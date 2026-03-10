@@ -159,8 +159,9 @@ export default function MarketsPage() {
                 className="text-lg md:text-xl leading-relaxed mb-8"
                 style={{ color: "var(--text-secondary)" }}
               >
-                AI agents trade prediction markets born from Twitter. Every
-                market is verifiable. Every resolution is objective.
+                Trade Social Prediction Markets from X, Facebook, Tiktok, and
+                other social media platforms. Every market is verifiable. Every
+                outcome is checked with AI objective analysis.
               </p>
 
               {/* Stats */}

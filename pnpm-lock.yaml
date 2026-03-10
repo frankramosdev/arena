@@ -38,8 +38,8 @@ importers:
   creation:
     dependencies:
       '@ai-sdk/xai':
-        specifier: ^2.0.39
-        version: 2.0.39(zod@3.25.76)
+        specifier: ^2.0.62
+        version: 2.0.62(zod@3.25.76)
       '@sigarena/common':
         specifier: workspace:*
         version: link:../common
@@ -106,8 +106,8 @@ importers:
   personality-creator:
     dependencies:
       '@ai-sdk/xai':
-        specifier: ^2.0.39
-        version: 2.0.39(zod@3.25.76)
+        specifier: ^2.0.62
+        version: 2.0.62(zod@3.25.76)
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.19.6(hono@4.10.7)
@@ -171,13 +171,13 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
-  resolution: {dependencies: {'@ai-sdk/xai': {specifier: ^2.0.39, version: 2.0.39(zod@3.25.76)}, '@hono/node-server': {specifier: ^1.14.1, version: 1.19.6(hono@4.10.7)}, '@sigarena/common': {specifier: workspace:*, version: link:../common}, ai: {specifier: ^5.0.108, version: 5.0.108(zod@3.25.76)}, dotenv: {specifier: ^16.5.0, version: 16.6.1}, hono: {specifier: ^4.7.10, version: 4.10.7}, zod: {specifier: ^3.25.30, version: 3.25.76}}, devDependencies: {'@types/node': {specifier: ^22.15.21, version: 22.19.1}, tsx: {specifier: ^4.19.4, version: 4.21.0}, typescript: {specifier: ^5.8.3, version: 5.9.3}, vitest: {specifier: ^3.1.4, version: 3.2.4(@types/node@22.19.1)(lightningcss@1.31.1)}}}
+  resolution: {dependencies: {'@ai-sdk/xai': {specifier: ^2.0.62, version: 2.0.62(zod@3.25.76)}, '@hono/node-server': {specifier: ^1.14.1, version: 1.19.6(hono@4.10.7)}, '@sigarena/common': {specifier: workspace:*, version: link:../common}, ai: {specifier: ^5.0.108, version: 5.0.108(zod@3.25.76)}, dotenv: {specifier: ^16.5.0, version: 16.6.1}, hono: {specifier: ^4.7.10, version: 4.10.7}, zod: {specifier: ^3.25.30, version: 3.25.76}}, devDependencies: {'@types/node': {specifier: ^22.15.21, version: 22.19.1}, tsx: {specifier: ^4.19.4, version: 4.21.0}, typescript: {specifier: ^5.8.3, version: 5.9.3}, vitest: {specifier: ^3.1.4, version: 3.2.4(@types/node@22.19.1)(lightningcss@1.31.1)}}}
 
   trading:
     dependencies:
       '@ai-sdk/xai':
-        specifier: ^2.0.39
-        version: 2.0.39(zod@3.25.76)
+        specifier: ^2.0.62
+        version: 2.0.62(zod@3.25.76)
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.19.6(hono@4.10.7)
@@ -224,8 +224,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai-compatible@1.0.28':
-    resolution: {integrity: sha512-yKubDxLYtXyGUzkr9lNStf/lE/I+Okc8tmotvyABhsQHHieLKk6oV5fJeRJxhr67Ejhg+FRnwUOxAmjRoFM4dA==}
+  '@ai-sdk/openai-compatible@1.0.34':
+    resolution: {integrity: sha512-AnGoxVNZ/E3EU4lW12rrufI6riqL2cEv4jk3OrjJ/i54XwR0CJU1V26jXAwxb+Pc+uZmYG++HM+gzXxPQZkMNQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -236,12 +236,22 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/provider-utils@3.0.22':
+    resolution: {integrity: sha512-fFT1KfUUKktfAFm5mClJhS1oux9tP2qgzmEZVl5UdwltQ1LO/s8hd7znVrgKzivwv1s1FIPza0s9OpJaNB/vHw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider@2.0.0':
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/xai@2.0.39':
-    resolution: {integrity: sha512-EtRRHpPb3J6qY8y9C9p1g3FdF8dl6SocmfyS418g+PesK9/bIAbJYWQStdWpJXF/d9VfzeoOp1IhcBgKotAn+A==}
+  '@ai-sdk/provider@2.0.1':
+    resolution: {integrity: sha512-KCUwswvsC5VsW2PWFqF8eJgSCu5Ysj7m1TxiHTVA6g7k360bk0RNQENT8KTMAYEs+8fWPD3Uu4dEmzGHc+jGng==}
+    engines: {node: '>=18'}
+
+  '@ai-sdk/xai@2.0.62':
+    resolution: {integrity: sha512-NpUyro5mnMb1d9f9Ks/nSMQ0ulf63XygBKWKE5D9bRU5y8hrolWeP0oSJYirsySTLoSLasPrMsyrXko4/dz/ng==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3012,10 +3022,10 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 3.25.76
 
-  '@ai-sdk/openai-compatible@1.0.28(zod@3.25.76)':
+  '@ai-sdk/openai-compatible@1.0.34(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.18(zod@3.25.76)
+      '@ai-sdk/provider': 2.0.1
+      '@ai-sdk/provider-utils': 3.0.22(zod@3.25.76)
       zod: 3.25.76
 
   '@ai-sdk/provider-utils@3.0.18(zod@3.25.76)':
@@ -3025,15 +3035,26 @@ snapshots:
       eventsource-parser: 3.0.6
       zod: 3.25.76
 
+  '@ai-sdk/provider-utils@3.0.22(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.1
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
+      zod: 3.25.76
+
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/xai@2.0.39(zod@3.25.76)':
+  '@ai-sdk/provider@2.0.1':
     dependencies:
-      '@ai-sdk/openai-compatible': 1.0.28(zod@3.25.76)
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.18(zod@3.25.76)
+      json-schema: 0.4.0
+
+  '@ai-sdk/xai@2.0.62(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 1.0.34(zod@3.25.76)
+      '@ai-sdk/provider': 2.0.1
+      '@ai-sdk/provider-utils': 3.0.22(zod@3.25.76)
       zod: 3.25.76
 
   '@alloc/quick-lru@5.2.0': {}

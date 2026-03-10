@@ -10,13 +10,18 @@
     "generate:once": "tsx src/cli.ts generate --once",
     "test": "vitest run"
   },
-  "keywords": ["prediction-markets", "ai-agent", "xai", "grok"],
+  "keywords": [
+    "prediction-markets",
+    "ai-agent",
+    "xai",
+    "grok"
+  ],
   "author": "frankramosdev",
   "license": "ISC",
   "description": "Creation agent for generating X-specific prediction markets",
   "packageManager": "pnpm@9.15.0",
   "dependencies": {
-    "@ai-sdk/xai": "^2.0.39",
+    "@ai-sdk/xai": "^2.0.62",
     "@sigarena/common": "workspace:*",
     "ai": "^5.0.108",
     "dotenv": "^16.4.7",
