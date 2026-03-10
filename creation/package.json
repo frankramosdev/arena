@@ -1,0 +1,31 @@
+{
+  "name": "@sigarena/creation",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/cli.ts",
+    "generate": "tsx src/cli.ts generate",
+    "generate:once": "tsx src/cli.ts generate --once",
+    "test": "vitest run"
+  },
+  "keywords": ["prediction-markets", "ai-agent", "xai", "grok"],
+  "author": "gajesh",
+  "license": "ISC",
+  "description": "Creation agent for generating X-specific prediction markets",
+  "packageManager": "pnpm@9.15.0",
+  "dependencies": {
+    "@ai-sdk/xai": "^2.0.39",
+    "@sigarena/common": "workspace:*",
+    "ai": "^5.0.108",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

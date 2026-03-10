@@ -1,0 +1,7 @@
+packages:
+  - common
+  - creation
+  - personality-creator
+  - registry
+  - resolution
+  - trading

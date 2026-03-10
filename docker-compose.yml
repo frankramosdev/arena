@@ -1,0 +1,189 @@
+# SIG Arena - Docker Compose
+# 
+# Spins up all services:
+#   - registry:   Market registry API (port 3100)
+#   - creation:   Market creation agent
+#   - resolution: Market resolution agent (port 3200)
+#   - trading:    Trading floor API + AI agents (port 3300)
+#   - frontend:   Next.js web app (port 3000)
+#
+# Usage:
+#   docker-compose up -d              # Start all services
+#   docker-compose up -d registry     # Start only registry
+#   docker-compose logs -f trading    # Follow trading logs
+#   docker-compose down               # Stop all services
+
+services:
+  # ==========================================================================
+  # Registry - Market Exchange API
+  # ==========================================================================
+  registry:
+    build:
+      context: .
+      dockerfile: registry/Dockerfile
+    container_name: sig-registry
+    ports:
+      - "3100:3100"
+    volumes:
+      # Persist SQLite database
+      - registry-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+      - TZ=America/Los_Angeles
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3100/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Creation Agent - AI Market Generation
+  # ==========================================================================
+  creation:
+    build:
+      context: .
+      dockerfile: creation/Dockerfile
+    container_name: sig-creation
+    depends_on:
+      registry:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles
+      - REGISTRY_URL=http://registry:3100
+      - XAI_API_KEY=${XAI_API_KEY}
+      - BOOTSTRAP_SECRET=${BOOTSTRAP_SECRET:-sigarena-bootstrap-2024}
+      - GENERATION_INTERVAL_MS=${GENERATION_INTERVAL_MS:-1500000}
+      - MAX_MARKETS_PER_RUN=${MAX_MARKETS_PER_RUN:-5}
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Resolution Agent - AI Market Resolution
+  # ==========================================================================
+  resolution:
+    build:
+      context: .
+      dockerfile: resolution/Dockerfile
+    container_name: sig-resolution
+    ports:
+      - "3200:3200"
+    depends_on:
+      registry:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles
+      - REGISTRY_URL=http://registry:3100
+      - XAI_API_KEY=${XAI_API_KEY}
+      - X_BEARER_TOKEN=${X_BEARER_TOKEN}
+      - BOOTSTRAP_SECRET=${BOOTSTRAP_SECRET:-sigarena-bootstrap-2024}
+      - RESOLUTION_API_PORT=3200
+      - RESOLUTION_CHECK_INTERVAL_MS=${RESOLUTION_CHECK_INTERVAL_MS:-60000}
+      - RESOLUTION_MONITOR_HOURS=${RESOLUTION_MONITOR_HOURS:-24}
+      - RESOLUTION_BATCH_SIZE=${RESOLUTION_BATCH_SIZE:-10}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3200/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Trading Floor - AI Agent Trading API
+  # ==========================================================================
+  trading:
+    build:
+      context: .
+      dockerfile: trading/Dockerfile
+    container_name: sig-trading
+    ports:
+      - "3300:3300"
+    depends_on:
+      registry:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles
+      - REGISTRY_URL=http://registry:3100
+      - XAI_API_KEY=${XAI_API_KEY}
+      - X_BEARER_TOKEN=${X_BEARER_TOKEN}
+      - TRADING_API_PORT=3300
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3300/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Frontend - Next.js Web App
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Public URLs for client-side (browser)
+        NEXT_PUBLIC_REGISTRY_URL: ${NEXT_PUBLIC_REGISTRY_URL:-http://localhost:3100}
+        NEXT_PUBLIC_TRADING_URL: ${NEXT_PUBLIC_TRADING_URL:-http://localhost:3300}
+        NEXT_PUBLIC_RESOLUTION_URL: ${NEXT_PUBLIC_RESOLUTION_URL:-http://localhost:3200}
+    container_name: sig-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      registry:
+        condition: service_healthy
+      trading:
+        condition: service_healthy
+      resolution:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles
+      - PORT=3000
+      # Internal URLs for server-side rendering (container-to-container)
+      - INTERNAL_REGISTRY_URL=http://registry:3100
+      - INTERNAL_TRADING_URL=http://trading:3300
+      - INTERNAL_RESOLUTION_URL=http://resolution:3200
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Personality Creator - AI Personality Generation API
+  # ==========================================================================
+  personality-creator:
+    build:
+      context: .
+      dockerfile: personality-creator/Dockerfile
+    container_name: sig-personality-creator
+    ports:
+      - "3400:3400"
+    environment:
+      - NODE_ENV=production
+      - TZ=America/Los_Angeles
+      - XAI_API_KEY=${XAI_API_KEY}
+      - X_BEARER_TOKEN=${X_BEARER_TOKEN}
+      - PERSONALITY_CREATOR_PORT=3400
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3400/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  registry-data:
+    driver: local
+
+# ==========================================================================
+# Network Configuration
+# ==========================================================================
+networks:
+  default:
+    name: sig-arena-network
+    driver: bridge

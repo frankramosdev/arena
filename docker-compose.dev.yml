@@ -1,0 +1,61 @@
+# SIG Arena - Development Docker Compose
+#
+# Use this for local development with hot reload
+#
+# Usage:
+#   docker-compose -f docker-compose.dev.yml up -d
+
+services:
+  # ==========================================================================
+  # Registry - Development Mode with Volume Mount
+  # ==========================================================================
+  registry:
+    build:
+      context: .
+      dockerfile: registry/Dockerfile
+      target: base  # Stop at base stage for dev
+    container_name: sig-registry-dev
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./registry/src:/app/registry/src
+      - ./common:/app/common
+      - registry-data:/app/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3100
+    command: pnpm --filter @sig-arena/registry dev
+    restart: unless-stopped
+
+  # ==========================================================================
+  # Resolution Agent - Development Mode
+  # ==========================================================================
+  resolution:
+    build:
+      context: .
+      dockerfile: resolution/Dockerfile
+      target: base
+    container_name: sig-resolution-dev
+    ports:
+      - "3200:3200"
+    depends_on:
+      - registry
+    volumes:
+      - ./resolution/src:/app/resolution/src
+      - ./common:/app/common
+    environment:
+      - NODE_ENV=development
+      - REGISTRY_URL=http://registry:3100
+      - XAI_API_KEY=${XAI_API_KEY}
+      - X_BEARER_TOKEN=${X_BEARER_TOKEN}
+      - AGENT_TOKEN=${AGENT_TOKEN}
+      - RESOLUTION_API_PORT=3200
+    command: pnpm --filter @sigarena/resolution resolve
+    restart: unless-stopped
+
+volumes:
+  registry-data:
+
+networks:
+  default:
+    name: sig-arena-dev
