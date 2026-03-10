@@ -1,6 +1,7 @@
 packages:
   - common
   - creation
+  - frontend
   - personality-creator
   - registry
   - resolution

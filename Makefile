@@ -1,11 +1,11 @@
-# SIG Arena Makefile
+# Basemarket Makefile
 # Quick commands for development and deployment
 
 .PHONY: help up down logs build clean dev registry creation resolution frontend trading
 
 # Default target
 help:
-	@echo "SIG Arena - Available Commands"
+	@echo "Basemarket - Available Commands"
 	@echo "=============================="
 	@echo ""
 	@echo "Docker Commands:"

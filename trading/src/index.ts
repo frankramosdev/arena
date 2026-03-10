@@ -1,6 +1,6 @@
 /**
- * SIG Arena Trading Service
- * 
+ * Basemarket Trading Service
+ *
  * Agent-to-agent trading with personalities.
  */
 
@@ -20,7 +20,10 @@ export {
 export { TradingStorage, getTradingStorage } from "./storage/index.js";
 
 // Coordinator
-export { TradingCoordinator, getTradingCoordinator } from "./coordinator/index.js";
+export {
+  TradingCoordinator,
+  getTradingCoordinator,
+} from "./coordinator/index.js";
 
 // Registry Integration
 export * from "./registry/index.js";

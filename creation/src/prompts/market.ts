@@ -12,12 +12,15 @@ import { getDateContext } from "../utils/date.js";
  */
 export function getMarketPrompt(config: GenerationConfig): string {
   const ctx = getDateContext();
-  const handles = config.priorityHandles.slice(0, 10).map((h) => `@${h}`).join(", ");
+  const handles = config.priorityHandles
+    .slice(0, 10)
+    .map((h) => `@${h}`)
+    .join(", ");
   const topics = config.priorityTopics.slice(0, 5).join(", ");
 
-  return `# SIG Arena Market Creation - Deep Research Mode
+  return `# Basemarket Market Creation - Deep Research Mode
 
-You are creating prediction markets for SIG Arena. Your job is to conduct THOROUGH RESEARCH before creating any market.
+You are creating prediction markets for Basemarket. Your job is to conduct THOROUGH RESEARCH before creating any market.
 
 ## Your Task
 

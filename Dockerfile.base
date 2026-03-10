@@ -1,4 +1,4 @@
-# Base image for all SIG Arena services
+# Base image for all Basemarket services
 # Multi-stage build for pnpm monorepo
 
 FROM node:22-slim AS base

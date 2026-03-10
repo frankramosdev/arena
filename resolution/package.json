@@ -2,7 +2,7 @@
   "name": "@sigarena/resolution",
   "version": "0.1.0",
   "type": "module",
-  "description": "AI-driven market resolution agent for SIG Arena",
+  "description": "AI-driven market resolution agent for Basemarket",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {

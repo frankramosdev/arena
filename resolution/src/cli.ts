@@ -1,6 +1,6 @@
 /**
- * SIG Arena - Resolution Agent CLI
- * 
+ * Basemarket - Resolution Agent CLI
+ *
  * Monitors markets for resolution and provides API for early resolution requests.
  */
 
@@ -20,7 +20,8 @@ const DOUBLE_DIVIDER = "═".repeat(70);
 
 // Registry API configuration
 const REGISTRY_URL = process.env.REGISTRY_URL || "http://localhost:3100";
-const BOOTSTRAP_SECRET = process.env.BOOTSTRAP_SECRET || "sigarena-bootstrap-2024";
+const BOOTSTRAP_SECRET =
+  process.env.BOOTSTRAP_SECRET || "sigarena-bootstrap-2024";
 let AGENT_TOKEN = process.env.AGENT_TOKEN;
 
 /**
@@ -28,25 +29,27 @@ let AGENT_TOKEN = process.env.AGENT_TOKEN;
  */
 async function ensureAgentToken(): Promise<void> {
   if (AGENT_TOKEN) return;
-  
+
   console.log("[Resolution] AGENT_TOKEN not set, fetching from registry...");
-  
+
   try {
     const response = await fetch(`${REGISTRY_URL}/users/agent-token`, {
       headers: { "X-Bootstrap-Secret": BOOTSTRAP_SECRET },
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
-    const data = await response.json() as { token: string; agentId: string };
+
+    const data = (await response.json()) as { token: string; agentId: string };
     AGENT_TOKEN = data.token;
     configureRegistry({ url: REGISTRY_URL, token: AGENT_TOKEN });
     console.log(`[Resolution] Got agent token for ${data.agentId}`);
   } catch (err) {
     console.error("[ERROR] Failed to fetch agent token:", err);
-    console.error("[ERROR] Set AGENT_TOKEN env var or ensure registry is running");
+    console.error(
+      "[ERROR] Set AGENT_TOKEN env var or ensure registry is running",
+    );
     process.exit(1);
   }
 }
@@ -55,7 +58,7 @@ async function ensureAgentToken(): Promise<void> {
 configureRegistry({ url: REGISTRY_URL, token: AGENT_TOKEN });
 
 const USAGE = `
-SIG Arena - Resolution Agent
+Basemarket - Resolution Agent
 
 USAGE
   pnpm resolve             Start monitoring daemon + API server
@@ -111,7 +114,9 @@ async function showStatus(): Promise<void> {
   if (pending.markets && pending.markets.length > 0) {
     console.log("\n  Pending Resolution (next 24h):");
     for (const m of pending.markets.slice(0, 10)) {
-      console.log(`    ${m.id.slice(0, 8)}... | ${m.resolutionDate} | ${m.question.slice(0, 40)}...`);
+      console.log(
+        `    ${m.id.slice(0, 8)}... | ${m.resolutionDate} | ${m.question.slice(0, 40)}...`,
+      );
     }
     if (pending.markets.length > 10) {
       console.log(`    ... and ${pending.markets.length - 10} more`);
@@ -123,7 +128,9 @@ async function showStatus(): Promise<void> {
   if (overdue.markets && overdue.markets.length > 0) {
     console.log("\n  ⚠️  OVERDUE (need resolution):");
     for (const m of overdue.markets) {
-      console.log(`    ${m.id.slice(0, 8)}... | ${m.resolutionDate} | ${m.question.slice(0, 40)}...`);
+      console.log(
+        `    ${m.id.slice(0, 8)}... | ${m.resolutionDate} | ${m.question.slice(0, 40)}...`,
+      );
     }
   }
 
@@ -132,7 +139,7 @@ async function showStatus(): Promise<void> {
 
 async function runDaemon(): Promise<void> {
   console.log(DOUBLE_DIVIDER);
-  console.log("  SIG ARENA - RESOLUTION AGENT");
+  console.log("  Basemarket - RESOLUTION AGENT");
   console.log(DOUBLE_DIVIDER);
   console.log(`\n  Registry:    ${REGISTRY_URL}`);
   console.log(`  Check Int:   ${CONFIG.resolution.checkIntervalMs / 1000}s`);
@@ -158,7 +165,9 @@ async function runDaemon(): Promise<void> {
 
   const stop = agent.startMonitoring((stats) => {
     if (stats.resolved > 0 || stats.failed > 0) {
-      console.log(`\n  Cycle: ${stats.resolved} resolved, ${stats.failed} failed, ${stats.skipped} skipped`);
+      console.log(
+        `\n  Cycle: ${stats.resolved} resolved, ${stats.failed} failed, ${stats.skipped} skipped`,
+      );
     }
   });
 
@@ -245,8 +254,12 @@ EXAMPLES
   console.log(DOUBLE_DIVIDER);
   console.log(`\n  Question: ${question}`);
   console.log(`  Type:     ${request.verificationType}`);
-  if (request.targetHandles) console.log(`  Handles:  ${request.targetHandles.map((h) => `@${h}`).join(", ")}`);
-  if (request.keywords) console.log(`  Keywords: ${request.keywords.join(", ")}`);
+  if (request.targetHandles)
+    console.log(
+      `  Handles:  ${request.targetHandles.map((h) => `@${h}`).join(", ")}`,
+    );
+  if (request.keywords)
+    console.log(`  Keywords: ${request.keywords.join(", ")}`);
   if (request.threshold) console.log(`  Threshold: ${request.threshold}`);
   console.log("\n" + DIVIDER);
   console.log("  RESOLVING...");
@@ -259,16 +272,20 @@ EXAMPLES
   console.log("  RESULT");
   console.log(DOUBLE_DIVIDER);
   console.log(`\n  Outcome:     ${result.outcome}`);
-  console.log(`  Confidence:  ${(result.evidence.confidence * 100).toFixed(1)}%`);
+  console.log(
+    `  Confidence:  ${(result.evidence.confidence * 100).toFixed(1)}%`,
+  );
   console.log(`  Tool Calls:  ${result.toolCalls}`);
   console.log(`  Model:       ${result.model}`);
-  
+
   console.log("\n  Evidence:");
   console.log(`    Type:        ${result.evidence.type}`);
-  if (result.evidence.url) console.log(`    URL:         ${result.evidence.url}`);
-  if (result.evidence.tweetId) console.log(`    Tweet ID:    ${result.evidence.tweetId}`);
+  if (result.evidence.url)
+    console.log(`    URL:         ${result.evidence.url}`);
+  if (result.evidence.tweetId)
+    console.log(`    Tweet ID:    ${result.evidence.tweetId}`);
   console.log(`    Explanation: ${result.evidence.explanation}`);
-  
+
   console.log("\n" + DOUBLE_DIVIDER);
 }
 
@@ -301,13 +318,15 @@ async function main(): Promise<void> {
     const healthy = await isRegistryHealthy();
     if (!healthy) {
       console.error(`[ERROR] Cannot reach registry at ${REGISTRY_URL}`);
-      console.error("[ERROR] Start the registry first: cd registry && pnpm start");
+      console.error(
+        "[ERROR] Start the registry first: cd registry && pnpm start",
+      );
       process.exit(1);
     }
-    
+
     // Ensure we have an agent token
     await ensureAgentToken();
-    
+
     console.log("[Resolution] Registry connected\n");
   }
 

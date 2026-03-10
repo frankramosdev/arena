@@ -1,5 +1,5 @@
 # Frontend
-# Next.js web app for SIG Arena
+# Next.js web app for Basemarket
 
 FROM node:22-slim AS deps
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate

@@ -1,7 +1,7 @@
 {
   "name": "@sig-arena/registry",
   "version": "0.1.0",
-  "description": "SIG Arena Exchange - Polymarket-style prediction market CLOB",
+  "description": "Basemarket Exchange - Polymarket-style prediction market CLOB",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "clob",
     "orderbook"
   ],
-  "author": "gajesh",
+  "author": "frankramosdev",
   "license": "MIT",
   "dependencies": {
     "@hono/node-server": "^1.19.6",

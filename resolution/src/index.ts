@@ -1,6 +1,6 @@
 /**
- * SIG Arena - Resolution Agent
- * 
+ * Basemarket - Resolution Agent
+ *
  * AI-driven market resolution using X API.
  */
 

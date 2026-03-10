@@ -1,5 +1,5 @@
 // =============================================================================
-// SIG Arena - Market Registry
+// Basemarket - Market Registry
 // =============================================================================
 //
 // Polymarket-style prediction market exchange with SQLite persistence.
@@ -30,14 +30,14 @@ export type {
   TokenType,
   OrderType,
   OrderStatus,
-  
+
   // User & Auth
   UserRole,
   User,
-  
+
   // Verification
   VerificationMethod,
-  
+
   // Market
   TokenSupply,
   MarketPrices,
@@ -46,18 +46,18 @@ export type {
   MarketSource,
   RegistryMarket,
   ResolutionProof,
-  
+
   // Orders & Trading
   Order,
   Trade,
   BookLevel,
   TokenOrderBook,
   MarketOrderBook,
-  
+
   // Trader
   Trader,
   Position,
-  
+
   // API inputs
   CreateMarketInput,
   MintInput,

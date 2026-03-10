@@ -1,5 +1,5 @@
-# SIG Arena - Docker Compose
-# 
+# Basemarket - Docker Compose
+#
 # Spins up all services:
 #   - registry:   Market registry API (port 3100)
 #   - creation:   Market creation agent
@@ -32,7 +32,13 @@ services:
       - PORT=3100
       - TZ=America/Los_Angeles
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3100/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3100/health').then(r => process.exit(r.ok ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -85,7 +91,13 @@ services:
       - RESOLUTION_MONITOR_HOURS=${RESOLUTION_MONITOR_HOURS:-24}
       - RESOLUTION_BATCH_SIZE=${RESOLUTION_BATCH_SIZE:-10}
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3200/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3200/health').then(r => process.exit(r.ok ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -113,7 +125,13 @@ services:
       - X_BEARER_TOKEN=${X_BEARER_TOKEN}
       - TRADING_API_PORT=3300
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3300/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3300/health').then(r => process.exit(r.ok ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -169,7 +187,13 @@ services:
       - X_BEARER_TOKEN=${X_BEARER_TOKEN}
       - PERSONALITY_CREATOR_PORT=3400
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3400/health').then(r => process.exit(r.ok ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3400/health').then(r => process.exit(r.ok ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

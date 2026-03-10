@@ -21,7 +21,9 @@ vi.mock("../../src/coordinator/index.js", () => ({
       },
     ]),
     runFloorRound: vi.fn().mockResolvedValue([]),
-    runSideChatRound: vi.fn().mockResolvedValue({ messages: [], closed: false }),
+    runSideChatRound: vi
+      .fn()
+      .mockResolvedValue({ messages: [], closed: false }),
     runAllSideChatsParallel: vi.fn().mockResolvedValue([]),
     expireAgreements: vi.fn(),
     setHandlers: vi.fn(),
@@ -82,7 +84,7 @@ describe("Trading Floor API", () => {
       expect(res.status).toBe(200);
 
       const body = await res.json();
-      expect(body.name).toBe("SIG Arena Trading Floor");
+      expect(body.name).toBe("Basemarket Trading Floor");
       expect(body.endpoints).toBeDefined();
     });
   });

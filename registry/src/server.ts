@@ -1,6 +1,6 @@
 /**
- * SIG Arena Registry Server
- * 
+ * Basemarket Registry Server
+ *
  * Starts the Hono API server.
  */
 
@@ -15,35 +15,37 @@ const PORT = parseInt(process.env.REGISTRY_PORT || "3100");
 
 function bootstrap() {
   const { total } = registry.listUsers(0, 1);
-  
+
   if (total > 0) {
-    console.log(`[Bootstrap] Found ${total} existing users, skipping bootstrap`);
-    
+    console.log(
+      `[Bootstrap] Found ${total} existing users, skipping bootstrap`,
+    );
+
     // Log existing agent token if we have one
     const agents = registry.listUsers(0, 100);
-    const agent = agents.users.find(u => u.role === "agent");
+    const agent = agents.users.find((u) => u.role === "agent");
     if (agent) {
       console.log(`[Bootstrap] Existing agent token: ${agent.token}`);
     }
     return;
   }
-  
+
   console.log("[Bootstrap] First startup - creating admin and agent users...");
-  
+
   // Create admin user
-  const admin = registry.createUser({ 
-    name: "Admin", 
+  const admin = registry.createUser({
+    name: "Admin",
     role: "admin",
   });
   console.log(`[Bootstrap] Created admin: ${admin.id}`);
-  
+
   // Create shared agent (used by both creation and resolution)
   const agent = registry.createUser({
     name: "SigArenaAgent",
     role: "agent",
   });
   console.log(`[Bootstrap] Created agent: ${agent.id}`);
-  
+
   // Output tokens
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════╗
@@ -56,7 +58,7 @@ function bootstrap() {
 ║  Set AGENT_TOKEN in your .env for creation/resolution agents.     ║
 ╚═══════════════════════════════════════════════════════════════════╝
 `);
-  
+
   // Write to file for Docker to pick up
   try {
     const fs = require("fs");
@@ -72,7 +74,7 @@ bootstrap();
 
 console.log(`
 ╔═══════════════════════════════════════════════════════════════════╗
-║                     SIG Arena Registry                             ║
+║                     Basemarket Registry                             ║
 ║                   Polymarket-style Exchange                        ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║  Token Model: 1 YES + 1 NO = $1                                   ║
@@ -80,12 +82,14 @@ console.log(`
 ╚═══════════════════════════════════════════════════════════════════╝
 `);
 
-serve({
-  fetch: api.fetch,
-  port: PORT,
-}, (info) => {
-  console.log(`🚀 Registry API running at http://localhost:${info.port}`);
-  console.log(`
+serve(
+  {
+    fetch: api.fetch,
+    port: PORT,
+  },
+  (info) => {
+    console.log(`🚀 Registry API running at http://localhost:${info.port}`);
+    console.log(`
 API Endpoints:
 
   Public:
@@ -118,4 +122,5 @@ API Endpoints:
   GET  /users                     List all users
   POST /users/:id/credit          Credit balance
 `);
-});
+  },
+);

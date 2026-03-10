@@ -1,5 +1,5 @@
 /**
- * SIG Arena - Creation Agent
+ * Basemarket - Creation Agent
  *
  * Generates X/Twitter-specific prediction markets using xAI's agentic tools.
  *

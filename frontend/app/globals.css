@@ -1,5 +1,5 @@
 /* ============================================
-   SIG Arena — Design System
+   Basemarket — Design System
    Synthesis of Infinite Games
    ============================================ */
 
@@ -11,42 +11,42 @@
    ============================================ */
 :root {
   /* Background tones — warm cream/paper */
-  --bg-primary: #FAFAF8;
-  --bg-secondary: #F5F4F1;
-  --bg-tertiary: #EEEDEA;
-  --bg-card: #FFFFFF;
-  
+  --bg-primary: #fafaf8;
+  --bg-secondary: #f5f4f1;
+  --bg-tertiary: #eeedea;
+  --bg-card: #ffffff;
+
   /* Text colors — charcoal/ink */
-  --text-primary: #1A1A1A;
-  --text-secondary: #4A4A4A;
-  --text-tertiary: #7A7A7A;
-  --text-muted: #9A9A9A;
-  
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #7a7a7a;
+  --text-muted: #9a9a9a;
+
   /* Brand accent */
-  --accent-primary: #2D3436;
-  --accent-hover: #1A1D1E;
-  
+  --accent-primary: #2d3436;
+  --accent-hover: #1a1d1e;
+
   /* Status colors */
-  --green: #22C55E;
-  --green-soft: #DCFCE7;
-  --red: #EF4444;
-  --red-soft: #FEE2E2;
-  --amber: #F59E0B;
-  --amber-soft: #FEF3C7;
-  
+  --green: #22c55e;
+  --green-soft: #dcfce7;
+  --red: #ef4444;
+  --red-soft: #fee2e2;
+  --amber: #f59e0b;
+  --amber-soft: #fef3c7;
+
   /* Borders */
-  --border-light: #E5E4E1;
-  --border-medium: #D4D3D0;
-  
+  --border-light: #e5e4e1;
+  --border-medium: #d4d3d0;
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10);
-  
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+
   /* Spacing */
   --header-height: 72px;
-  
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
@@ -91,7 +91,10 @@ body {
 
 /* Serif */
 .font-serif,
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: "Instrument Serif", serif;
   font-weight: 400;
   font-style: normal;
@@ -110,7 +113,10 @@ h1, h2, h3, h4 {
   font-variation-settings: "wdth" 100;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   line-height: 1.2;
   color: var(--text-primary);
 }
@@ -188,7 +194,9 @@ a:hover {
 
 /* Card hover effect */
 .card-hover {
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .card-hover:hover {
@@ -198,7 +206,11 @@ a:hover {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--text-secondary) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -210,7 +222,7 @@ a:hover {
 }
 
 .animated-underline::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -255,13 +267,15 @@ a:hover {
   border-radius: 6px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-fast), visibility var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
   z-index: 100;
   pointer-events: none;
 }
 
 .tooltip-content::before {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -290,7 +304,8 @@ a:hover {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

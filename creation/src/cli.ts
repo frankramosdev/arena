@@ -1,6 +1,6 @@
 /**
- * SIG Arena - Creation Agent CLI
- * 
+ * Basemarket - Creation Agent CLI
+ *
  * Generates markets and submits them to the Registry API.
  * The agent itself checks for duplicates via the searchExistingMarkets tool.
  */
@@ -8,8 +8,8 @@
 import { CONFIG, validateConfig } from "./config/index.js";
 import { CreationAgent } from "./agent/index.js";
 import type { Market } from "./types/index.js";
-import { 
-  configureRegistry, 
+import {
+  configureRegistry,
   getRegistryStats as fetchRegistryStats,
   isRegistryHealthy,
 } from "@sigarena/common";
@@ -19,7 +19,8 @@ const DOUBLE_DIVIDER = "═".repeat(70);
 
 // Registry API configuration
 const REGISTRY_URL = process.env.REGISTRY_URL || "http://localhost:3100";
-const BOOTSTRAP_SECRET = process.env.BOOTSTRAP_SECRET || "sigarena-bootstrap-2024";
+const BOOTSTRAP_SECRET =
+  process.env.BOOTSTRAP_SECRET || "sigarena-bootstrap-2024";
 let AGENT_TOKEN = process.env.AGENT_TOKEN;
 
 /**
@@ -27,25 +28,27 @@ let AGENT_TOKEN = process.env.AGENT_TOKEN;
  */
 async function ensureAgentToken(): Promise<void> {
   if (AGENT_TOKEN) return;
-  
-  console.log("[SIG Arena] AGENT_TOKEN not set, fetching from registry...");
-  
+
+  console.log("[Basemarket] AGENT_TOKEN not set, fetching from registry...");
+
   try {
     const response = await fetch(`${REGISTRY_URL}/users/agent-token`, {
       headers: { "X-Bootstrap-Secret": BOOTSTRAP_SECRET },
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
-    const data = await response.json() as { token: string; agentId: string };
+
+    const data = (await response.json()) as { token: string; agentId: string };
     AGENT_TOKEN = data.token;
     configureRegistry({ url: REGISTRY_URL, token: AGENT_TOKEN });
-    console.log(`[SIG Arena] Got agent token for ${data.agentId}`);
+    console.log(`[Basemarket] Got agent token for ${data.agentId}`);
   } catch (err) {
     console.error("[ERROR] Failed to fetch agent token:", err);
-    console.error("[ERROR] Set AGENT_TOKEN env var or ensure registry is running");
+    console.error(
+      "[ERROR] Set AGENT_TOKEN env var or ensure registry is running",
+    );
     process.exit(1);
   }
 }
@@ -72,7 +75,9 @@ function formatMarket(market: Market, index: number): string {
   ];
 
   if (market.verification.targetHandles?.length) {
-    lines.push(`    Handles:    ${market.verification.targetHandles.map((h) => `@${h}`).join(", ")}`);
+    lines.push(
+      `    Handles:    ${market.verification.targetHandles.map((h) => `@${h}`).join(", ")}`,
+    );
   }
   if (market.verification.keywords?.length) {
     lines.push(`    Keywords:   ${market.verification.keywords.join(", ")}`);
@@ -98,17 +103,22 @@ function formatMarket(market: Market, index: number): string {
 /**
  * Submit market to Registry API
  */
-async function submitMarketToRegistry(market: Market): Promise<{ success: boolean; error?: string }> {
+async function submitMarketToRegistry(
+  market: Market,
+): Promise<{ success: boolean; error?: string }> {
   if (!AGENT_TOKEN) {
-    return { success: false, error: "AGENT_TOKEN not set. Get one from registry admin." };
+    return {
+      success: false,
+      error: "AGENT_TOKEN not set. Get one from registry admin.",
+    };
   }
 
   try {
     const response = await fetch(`${REGISTRY_URL}/markets`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${AGENT_TOKEN}`,
+        Authorization: `Bearer ${AGENT_TOKEN}`,
       },
       body: JSON.stringify({
         id: market.id,
@@ -140,9 +150,11 @@ async function submitMarketToRegistry(market: Market): Promise<{ success: boolea
  * Submit markets to Registry API
  * Note: The agent already checks for duplicates via searchExistingMarkets tool
  */
-async function submitMarketsToRegistry(markets: Market[]): Promise<{ saved: number; failed: number }> {
+async function submitMarketsToRegistry(
+  markets: Market[],
+): Promise<{ saved: number; failed: number }> {
   console.log(`[Registry] Submitting ${markets.length} market(s)...`);
-  
+
   let saved = 0;
   let failed = 0;
 
@@ -150,7 +162,9 @@ async function submitMarketsToRegistry(markets: Market[]): Promise<{ saved: numb
     const result = await submitMarketToRegistry(market);
     if (result.success) {
       saved++;
-      console.log(`  ✓ Created: ${market.id.slice(0, 8)}... "${market.question.slice(0, 50)}..."`);
+      console.log(
+        `  ✓ Created: ${market.id.slice(0, 8)}... "${market.question.slice(0, 50)}..."`,
+      );
     } else {
       failed++;
       // Registry returns "already exists" if duplicate - that's fine, agent should have avoided it
@@ -164,7 +178,10 @@ async function submitMarketsToRegistry(markets: Market[]): Promise<{ saved: numb
 /**
  * Get registry stats (uses common tool)
  */
-async function getRegistryStats(): Promise<{ totalMarkets: number; openMarkets: number } | null> {
+async function getRegistryStats(): Promise<{
+  totalMarkets: number;
+  openMarkets: number;
+} | null> {
   const result = await fetchRegistryStats();
   if (result.error || !result.stats) return null;
   return {
@@ -186,9 +203,9 @@ async function onMarketsGenerated(markets: Market[]): Promise<void> {
   console.log("\n" + DIVIDER);
   console.log("  SUBMITTING TO REGISTRY");
   console.log(DIVIDER);
-  
+
   const { saved, failed } = await submitMarketsToRegistry(markets);
-  
+
   console.log(`\n  Summary:`);
   console.log(`    ✓ Created:  ${saved} markets`);
   if (failed > 0) {
@@ -207,7 +224,7 @@ async function onMarketsGenerated(markets: Market[]): Promise<void> {
 }
 
 const USAGE = `
-SIG Arena - Creation Agent
+Basemarket - Creation Agent
 
 USAGE
   pnpm generate           Start continuous market generation
@@ -227,41 +244,53 @@ EXAMPLE
 
 async function runGenerate(once: boolean): Promise<void> {
   // Check registry is reachable
-  console.log(`[SIG Arena] Registry URL: ${REGISTRY_URL}`);
-  
+  console.log(`[Basemarket] Registry URL: ${REGISTRY_URL}`);
+
   const healthy = await isRegistryHealthy();
   if (!healthy) {
     console.error(`[ERROR] Cannot reach registry at ${REGISTRY_URL}`);
-    console.error("[ERROR] Start the registry first: cd registry && pnpm start");
+    console.error(
+      "[ERROR] Start the registry first: cd registry && pnpm start",
+    );
     process.exit(1);
   }
-  
+
   // Ensure we have an agent token
   await ensureAgentToken();
-  
+
   const stats = await getRegistryStats();
-  console.log(`[SIG Arena] Registry connected. ${stats?.totalMarkets ?? 0} markets, ${stats?.openMarkets ?? 0} open.\n`);
+  console.log(
+    `[Basemarket] Registry connected. ${stats?.totalMarkets ?? 0} markets, ${stats?.openMarkets ?? 0} open.\n`,
+  );
 
   const agent = new CreationAgent();
 
   if (once) {
-    console.log("[SIG Arena] Running single generation cycle\n");
+    console.log("[Basemarket] Running single generation cycle\n");
     const markets = await agent.runGenerationCycle();
     await onMarketsGenerated(markets);
   } else {
-    console.log("[SIG Arena] Starting continuous generation");
-    console.log(`[SIG Arena] Interval: ${CONFIG.generation.intervalMs / 1000}s`);
-    console.log("[SIG Arena] Press Ctrl+C to stop\n");
+    console.log("[Basemarket] Starting continuous generation");
+    console.log(
+      `[Basemarket] Interval: ${CONFIG.generation.intervalMs / 1000}s`,
+    );
+    console.log("[Basemarket] Press Ctrl+C to stop\n");
 
     const stop = agent.startPeriodicGeneration(
       CONFIG.generation.intervalMs,
       async (markets) => {
         await onMarketsGenerated(markets);
-      }
+      },
     );
 
-    process.on("SIGINT", () => { stop(); process.exit(0); });
-    process.on("SIGTERM", () => { stop(); process.exit(0); });
+    process.on("SIGINT", () => {
+      stop();
+      process.exit(0);
+    });
+    process.on("SIGTERM", () => {
+      stop();
+      process.exit(0);
+    });
   }
 }
 

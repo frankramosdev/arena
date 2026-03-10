@@ -1,4 +1,4 @@
-# SIG Arena - Development Docker Compose
+# Basemarket - Development Docker Compose
 #
 # Use this for local development with hot reload
 #
@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: registry/Dockerfile
-      target: base  # Stop at base stage for dev
+      target: base # Stop at base stage for dev
     container_name: sig-registry-dev
     ports:
       - "3100:3100"

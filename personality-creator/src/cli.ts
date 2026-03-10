@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Personality Creator CLI
- * 
+ *
  * Ship Your Agent - Generate trading personalities from Twitter profiles.
- * 
+ *
  * Usage: pnpm ship <username>
  */
 
@@ -29,7 +29,7 @@ import type { GeneratedAgent } from "./types/index.js";
 
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
     printHelp();
     process.exit(0);
@@ -37,12 +37,13 @@ async function main() {
 
   const username = args[0].replace("@", "");
   const outputIdx = args.indexOf("--output");
-  const outputDir = outputIdx !== -1 && args[outputIdx + 1] 
-    ? args[outputIdx + 1] 
-    : resolve(__dirname, "../agents");
+  const outputDir =
+    outputIdx !== -1 && args[outputIdx + 1]
+      ? args[outputIdx + 1]
+      : resolve(__dirname, "../agents");
 
   printBanner();
-  
+
   console.log(`\n📍 Target: @${username}\n`);
 
   // Create the agent
@@ -57,16 +58,15 @@ async function main() {
     // Generate personality
     console.log("🔍 Starting research...\n");
     const generatedAgent = await agent.createPersonality(username);
-    
+
     // Display results
     printResults(generatedAgent);
-    
+
     // Save to file
     saveAgent(generatedAgent, outputDir);
-    
+
     console.log("\n" + "═".repeat(80));
     console.log("\n✅ Agent ready to deploy!\n");
-    
   } catch (err) {
     console.error("\n❌ Failed to create personality:", err);
     process.exit(1);
@@ -80,7 +80,7 @@ async function main() {
 function printBanner() {
   console.log(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                        SIG ARENA - SHIP YOUR AGENT                           ║
+║                        Basemarket - SHIP YOUR AGENT                           ║
 ║                                                                              ║
 ║  Analyze Twitter profiles and generate trading personalities with Grok AI   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝`);
@@ -89,7 +89,7 @@ function printBanner() {
 function printHelp() {
   console.log(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                        SIG ARENA - SHIP YOUR AGENT                           ║
+║                        Basemarket - SHIP YOUR AGENT                           ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 Usage: pnpm ship <username>
@@ -121,40 +121,46 @@ The agent will:
 
 function printResults(agent: GeneratedAgent) {
   const p = agent.personality;
-  
+
   console.log("\n" + "═".repeat(80));
   console.log("\n🎉 PERSONALITY GENERATED\n");
-  
+
   console.log(`  Handle:         @${agent.handle}`);
   console.log(`  Display Name:   ${agent.displayName}`);
   if (agent.twitterId) {
     console.log(`  Twitter ID:     ${agent.twitterId}`);
   }
-  
+
   console.log("\n  --- Trading Profile ---");
   console.log(`  Risk Profile:       ${formatRisk(p.riskProfile)}`);
   console.log(`  Trading Style:      ${p.tradingStyle}`);
-  console.log(`  Max Position:       ${(p.maxPositionPercent * 100).toFixed(0)}%`);
-  console.log(`  Min Confidence:     ${(p.minConfidenceToTrade * 100).toFixed(0)}%`);
-  
+  console.log(
+    `  Max Position:       ${(p.maxPositionPercent * 100).toFixed(0)}%`,
+  );
+  console.log(
+    `  Min Confidence:     ${(p.minConfidenceToTrade * 100).toFixed(0)}%`,
+  );
+
   console.log("\n  --- Communication ---");
   console.log(`  Tone:               ${p.tone}`);
   console.log(`  Verbosity:          ${p.verbosity}`);
-  
+
   console.log("\n  --- Topics ---");
   console.log(`  Expertise:          ${p.expertise.join(", ")}`);
-  console.log(`  Avoids:             ${p.avoids.length > 0 ? p.avoids.join(", ") : "(nothing)"}`);
-  
+  console.log(
+    `  Avoids:             ${p.avoids.length > 0 ? p.avoids.join(", ") : "(nothing)"}`,
+  );
+
   if (p.catchphrases.length > 0) {
     console.log("\n  --- Catchphrases ---");
     for (const phrase of p.catchphrases) {
       console.log(`    • "${phrase}"`);
     }
   }
-  
+
   console.log("\n  --- Bio ---");
   console.log(`  ${p.bio}`);
-  
+
   console.log("\n  --- Trading Philosophy ---");
   console.log(`  ${p.tradingPhilosophy}`);
 }
@@ -162,7 +168,7 @@ function printResults(agent: GeneratedAgent) {
 function formatRisk(risk: string): string {
   const riskEmojis: Record<string, string> = {
     conservative: "🛡️ conservative",
-    moderate: "⚖️ moderate", 
+    moderate: "⚖️ moderate",
     aggressive: "⚡ aggressive",
     degen: "🎰 DEGEN",
   };
@@ -176,7 +182,7 @@ function saveAgent(agent: GeneratedAgent, outputDir: string) {
   }
 
   const outputPath = resolve(outputDir, `${agent.handle.toLowerCase()}.json`);
-  
+
   const serialized = {
     ...agent,
     personality: agent.personality,

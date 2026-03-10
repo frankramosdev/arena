@@ -1,6 +1,6 @@
 /**
  * Trading Floor API
- * 
+ *
  * REST + WebSocket API for the trading floor.
  */
 
@@ -9,9 +9,24 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { streamSSE } from "hono/streaming";
 import { getTradingCoordinator } from "../coordinator/index.js";
-import { getAgentFactory, getAgentAvatar, setAgentAvatar, getAllAvatars, getAgentEmoji } from "../agents/index.js";
-import { getOpenMarkets, isRegistryAvailable, type TradingMarket } from "../registry/index.js";
-import type { Message, InterestResponse, SideChat, MarketInfo } from "../types/index.js";
+import {
+  getAgentFactory,
+  getAgentAvatar,
+  setAgentAvatar,
+  getAllAvatars,
+  getAgentEmoji,
+} from "../agents/index.js";
+import {
+  getOpenMarkets,
+  isRegistryAvailable,
+  type TradingMarket,
+} from "../registry/index.js";
+import type {
+  Message,
+  InterestResponse,
+  SideChat,
+  MarketInfo,
+} from "../types/index.js";
 
 // =============================================================================
 // SETUP
@@ -23,7 +38,9 @@ const USE_REGISTRY = process.env.USE_REGISTRY !== "false"; // true by default
 const coordinator = getTradingCoordinator(":memory:", USE_REGISTRY);
 const factory = getAgentFactory();
 
-console.log(`[API] Registry integration: ${USE_REGISTRY ? "ENABLED" : "DISABLED"}`);
+console.log(
+  `[API] Registry integration: ${USE_REGISTRY ? "ENABLED" : "DISABLED"}`,
+);
 
 // SSE subscribers per market
 const subscribers = new Map<string, Set<(msg: Message) => void>>();
@@ -40,7 +57,7 @@ coordinator.setHandlers({
   },
   onTrade: (trade) => {
     console.log(`[API] Trade executed:`, trade);
-    
+
     // Record trade in all sessions for this market
     for (const session of sessions.values()) {
       if (session.marketId === trade.marketId) {
@@ -67,26 +84,30 @@ api.use("*", logger());
 // HEALTH & INFO
 // =============================================================================
 
-api.get("/", (c) => c.json({
-  name: "SIG Arena Trading Floor",
-  version: "1.0.0",
-  endpoints: {
-    "GET /health": "Health check",
-    "GET /agents": "List all agents",
-    "POST /sessions": "Start a trading session for a market",
-    "GET /sessions/:id": "Get session state",
-    "GET /sessions/:id/stream": "SSE stream of messages",
-    "GET /sessions/:id/interests": "Get interest responses",
-    "GET /sessions/:id/floor": "Get main floor messages",
-    "GET /sessions/:id/chats": "Get active side chats",
-  },
-}));
+api.get("/", (c) =>
+  c.json({
+    name: "Basemarket Trading Floor",
+    version: "1.0.0",
+    endpoints: {
+      "GET /health": "Health check",
+      "GET /agents": "List all agents",
+      "POST /sessions": "Start a trading session for a market",
+      "GET /sessions/:id": "Get session state",
+      "GET /sessions/:id/stream": "SSE stream of messages",
+      "GET /sessions/:id/interests": "Get interest responses",
+      "GET /sessions/:id/floor": "Get main floor messages",
+      "GET /sessions/:id/chats": "Get active side chats",
+    },
+  }),
+);
 
-api.get("/health", (c) => c.json({
-  status: "ok",
-  timestamp: new Date().toISOString(),
-  agents: factory.getAllAgents().length,
-}));
+api.get("/health", (c) =>
+  c.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    agents: factory.getAllAgents().length,
+  }),
+);
 
 // =============================================================================
 // AGENTS
@@ -95,7 +116,7 @@ api.get("/health", (c) => c.json({
 api.get("/agents", (c) => {
   const agents = factory.getAllAgents();
   return c.json({
-    agents: agents.map(a => ({
+    agents: agents.map((a) => ({
       id: a.id,
       handle: a.handle,
       displayName: a.displayName,
@@ -114,11 +135,11 @@ api.get("/agents", (c) => {
 api.get("/agents/:id", (c) => {
   const id = c.req.param("id");
   const agent = factory.getAgent(id) || factory.getAgent(`agent_${id}`);
-  
+
   if (!agent) {
     return c.json({ error: "Agent not found" }, 404);
   }
-  
+
   return c.json({
     agent: {
       id: agent.id,
@@ -147,8 +168,8 @@ api.get("/avatars", (c) => {
  */
 api.get("/avatars/:handle", (c) => {
   const handle = c.req.param("handle");
-  return c.json({ 
-    handle, 
+  return c.json({
+    handle,
     avatar: getAgentAvatar(handle),
     emoji: getAgentEmoji(handle),
   });
@@ -162,22 +183,22 @@ api.get("/avatars/:handle", (c) => {
 api.post("/avatars/:handle", async (c) => {
   const handle = c.req.param("handle");
   const body = await c.req.json();
-  
+
   if (!body.url || typeof body.url !== "string") {
     return c.json({ error: "URL required" }, 400);
   }
-  
+
   // Basic URL validation
   try {
     new URL(body.url);
   } catch {
     return c.json({ error: "Invalid URL" }, 400);
   }
-  
+
   setAgentAvatar(handle, body.url);
-  
-  return c.json({ 
-    success: true, 
+
+  return c.json({
+    success: true,
     handle,
     avatar: body.url,
   });
@@ -188,7 +209,7 @@ api.post("/avatars/:handle", async (c) => {
 // =============================================================================
 
 // Session type
-type SessionStatus = 'INITIALIZING' | 'INTEREST' | 'TRADING' | 'CLOSED';
+type SessionStatus = "INITIALIZING" | "INTEREST" | "TRADING" | "CLOSED";
 
 interface Session {
   id: string;
@@ -218,7 +239,7 @@ const sessions = new Map<string, Session>();
  * List all active sessions
  */
 api.get("/sessions", (c) => {
-  const sessionList = Array.from(sessions.values()).map(s => ({
+  const sessionList = Array.from(sessions.values()).map((s) => ({
     id: s.id,
     marketId: s.marketId,
     marketQuestion: s.marketQuestion,
@@ -226,13 +247,13 @@ api.get("/sessions", (c) => {
     startedAt: s.startedAt,
     stats: {
       interests: s.interests.length,
-      interested: s.interests.filter(i => i.type === 'INTERESTED').length,
+      interested: s.interests.filter((i) => i.type === "INTERESTED").length,
       floorMessages: s.floorMessages.length,
       sideChats: s.sideChats.size,
       trades: s.trades.length,
     },
   }));
-  
+
   return c.json({ sessions: sessionList });
 });
 
@@ -241,10 +262,12 @@ api.get("/sessions", (c) => {
  */
 api.get("/feed", (c) => {
   const limit = parseInt(c.req.query("limit") || "50");
-  
+
   // Collect all messages from all sessions
-  const allMessages: Array<Message & { sessionId: string; marketQuestion?: string }> = [];
-  
+  const allMessages: Array<
+    Message & { sessionId: string; marketQuestion?: string }
+  > = [];
+
   for (const session of sessions.values()) {
     for (const msg of session.floorMessages) {
       allMessages.push({
@@ -254,13 +277,17 @@ api.get("/feed", (c) => {
       });
     }
   }
-  
+
   // Sort by createdAt, newest first
-  allMessages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  
+  allMessages.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
   // Collect all trades
-  const allTrades: Array<Session["trades"][0] & { sessionId: string; marketQuestion?: string }> = [];
-  
+  const allTrades: Array<
+    Session["trades"][0] & { sessionId: string; marketQuestion?: string }
+  > = [];
+
   for (const session of sessions.values()) {
     for (const trade of session.trades) {
       allTrades.push({
@@ -270,13 +297,17 @@ api.get("/feed", (c) => {
       });
     }
   }
-  
-  allTrades.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  
+
+  allTrades.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  );
+
   return c.json({
     messages: allMessages.slice(0, limit),
     trades: allTrades.slice(0, limit),
-    activeSessions: Array.from(sessions.values()).filter(s => s.status === 'TRADING').length,
+    activeSessions: Array.from(sessions.values()).filter(
+      (s) => s.status === "TRADING",
+    ).length,
     totalAgents: factory.getAllAgents().length,
   });
 });
@@ -287,51 +318,51 @@ api.get("/feed", (c) => {
 api.post("/sessions", async (c) => {
   const body = await c.req.json();
   const { market } = body;
-  
+
   if (!market || !market.id || !market.question) {
     return c.json({ error: "Market data required" }, 400);
   }
-  
+
   // Initialize agents if not already done
   if (factory.getAllAgents().length === 0) {
     await coordinator.initializeAgents(10000);
   }
-  
+
   const sessionId = `session_${market.id}_${Date.now()}`;
-  
+
   const session: Session = {
     id: sessionId,
     marketId: market.id,
     marketQuestion: market.question,
-    status: 'INITIALIZING',
+    status: "INITIALIZING",
     interests: [],
     floorMessages: [],
     sideChats: new Map<string, SideChat>(),
     trades: [],
     startedAt: new Date().toISOString(),
   };
-  
+
   sessions.set(sessionId, session);
   subscribers.set(market.id, new Set());
-  
+
   // Start interest phase in background
   (async () => {
-    session.status = 'INTEREST';
+    session.status = "INTEREST";
     const interests = await coordinator.runInterestPhase(market);
     session.interests = interests;
-    session.status = 'TRADING';
-    
+    session.status = "TRADING";
+
     // Start trading loop
     const MAX_ROUNDS = 10;
     for (let round = 1; round <= MAX_ROUNDS; round++) {
-      if (session.status !== 'TRADING') break;
-      
+      if (session.status !== "TRADING") break;
+
       // Track current round
       (session as any).currentRound = round;
-      
+
       // Expire old agreements
       coordinator.expireAgreements();
-      
+
       // Run floor round (agents in parallel)
       const newMessages = await coordinator.runFloorRound(
         market,
@@ -339,17 +370,17 @@ api.post("/sessions", async (c) => {
         session.floorMessages,
         session.sideChats,
         round,
-        MAX_ROUNDS
+        MAX_ROUNDS,
       );
       session.floorMessages.push(...newMessages);
-      
+
       // Run all side chats in parallel
       await coordinator.runAllSideChatsParallel(market, session.sideChats);
     }
-    
-    session.status = 'CLOSED';
+
+    session.status = "CLOSED";
   })();
-  
+
   return c.json({
     session: {
       id: sessionId,
@@ -366,11 +397,11 @@ api.post("/sessions", async (c) => {
 api.get("/sessions/:id", (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
+
   return c.json({
     session: {
       id: session.id,
@@ -379,10 +410,13 @@ api.get("/sessions/:id", (c) => {
       startedAt: session.startedAt,
       stats: {
         interests: session.interests.length,
-        interested: session.interests.filter(i => i.type === 'INTERESTED').length,
+        interested: session.interests.filter((i) => i.type === "INTERESTED")
+          .length,
         floorMessages: session.floorMessages.length,
         sideChats: session.sideChats.size,
-        activeChats: Array.from(session.sideChats.values()).filter(c => c.status === 'NEGOTIATING').length,
+        activeChats: Array.from(session.sideChats.values()).filter(
+          (c) => c.status === "NEGOTIATING",
+        ).length,
         currentRound: (session as any).currentRound || 0,
         maxRounds: 10,
       },
@@ -396,11 +430,11 @@ api.get("/sessions/:id", (c) => {
 api.get("/sessions/:id/interests", (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
+
   return c.json({
     interests: session.interests,
   });
@@ -412,14 +446,14 @@ api.get("/sessions/:id/interests", (c) => {
 api.get("/sessions/:id/floor", (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
+
   const limit = parseInt(c.req.query("limit") || "50");
   const messages = session.floorMessages.slice(-limit);
-  
+
   return c.json({
     messages,
     total: session.floorMessages.length,
@@ -432,12 +466,12 @@ api.get("/sessions/:id/floor", (c) => {
 api.get("/sessions/:id/chats", (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
-  const chats = Array.from(session.sideChats.values()).map(chat => ({
+
+  const chats = Array.from(session.sideChats.values()).map((chat) => ({
     id: chat.id,
     participants: chat.participants,
     status: chat.status,
@@ -445,7 +479,7 @@ api.get("/sessions/:id/chats", (c) => {
     startedAt: chat.startedAt,
     closedAt: chat.closedAt,
   }));
-  
+
   return c.json({ chats });
 });
 
@@ -456,16 +490,16 @@ api.get("/sessions/:sessionId/chats/:chatId", (c) => {
   const sessionId = c.req.param("sessionId");
   const chatId = c.req.param("chatId");
   const session = sessions.get(sessionId);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
+
   const chat = session.sideChats.get(chatId);
   if (!chat) {
     return c.json({ error: "Chat not found" }, 404);
   }
-  
+
   return c.json({ chat });
 });
 
@@ -479,11 +513,11 @@ api.get("/sessions/:sessionId/chats/:chatId", (c) => {
 api.get("/sessions/:id/stream", async (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
+
   return streamSSE(c, async (stream) => {
     // Send initial state
     await stream.writeSSE({
@@ -494,7 +528,7 @@ api.get("/sessions/:id/stream", async (c) => {
         messages: session.floorMessages.length,
       }),
     });
-    
+
     // Subscribe to new messages
     const callback = async (msg: Message) => {
       await stream.writeSSE({
@@ -502,10 +536,10 @@ api.get("/sessions/:id/stream", async (c) => {
         data: JSON.stringify(msg),
       });
     };
-    
+
     const subs = subscribers.get(session.marketId);
     subs?.add(callback);
-    
+
     // Keep connection alive
     const keepAlive = setInterval(async () => {
       await stream.writeSSE({
@@ -513,18 +547,18 @@ api.get("/sessions/:id/stream", async (c) => {
         data: JSON.stringify({ timestamp: Date.now() }),
       });
     }, 30000);
-    
+
     // Cleanup on disconnect
     stream.onAbort(() => {
       clearInterval(keepAlive);
       subs?.delete(callback);
     });
-    
+
     // Wait until session closes or client disconnects
-    while (session.status !== 'CLOSED') {
-      await new Promise(r => setTimeout(r, 1000));
+    while (session.status !== "CLOSED") {
+      await new Promise((r) => setTimeout(r, 1000));
     }
-    
+
     await stream.writeSSE({
       event: "close",
       data: JSON.stringify({ status: "closed" }),
@@ -542,15 +576,15 @@ api.get("/sessions/:id/stream", async (c) => {
 api.post("/sessions/:id/floor/round", async (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
-  if (session.status !== 'TRADING') {
+
+  if (session.status !== "TRADING") {
     return c.json({ error: "Session not in trading state" }, 400);
   }
-  
+
   // Get market info (simplified)
   const market = {
     id: session.marketId,
@@ -562,13 +596,13 @@ api.post("/sessions/:id/floor/round", async (c) => {
     resolutionDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     status: "OPEN",
   };
-  
+
   coordinator.expireAgreements();
-  
+
   // Track round number (increment from session)
   const currentRound = ((session as any).currentRound || 0) + 1;
   (session as any).currentRound = currentRound;
-  
+
   const MAX_ROUNDS = 10;
   const newMessages = await coordinator.runFloorRound(
     market,
@@ -576,10 +610,10 @@ api.post("/sessions/:id/floor/round", async (c) => {
     session.floorMessages,
     session.sideChats,
     currentRound,
-    MAX_ROUNDS
+    MAX_ROUNDS,
   );
   session.floorMessages.push(...newMessages);
-  
+
   return c.json({
     messages: newMessages,
   });
@@ -591,13 +625,13 @@ api.post("/sessions/:id/floor/round", async (c) => {
 api.post("/sessions/:id/close", (c) => {
   const id = c.req.param("id");
   const session = sessions.get(id);
-  
+
   if (!session) {
     return c.json({ error: "Session not found" }, 404);
   }
-  
-  session.status = 'CLOSED';
-  
+
+  session.status = "CLOSED";
+
   return c.json({
     session: {
       id: session.id,
@@ -622,10 +656,10 @@ export async function startAutoTrading() {
     console.log("[AutoTrading] Already running");
     return;
   }
-  
+
   autoTradingActive = true;
   console.log("[AutoTrading] Starting...");
-  
+
   // Wait for registry to be available
   let registryReady = false;
   for (let i = 0; i < 30; i++) {
@@ -634,43 +668,45 @@ export async function startAutoTrading() {
       break;
     }
     console.log("[AutoTrading] Waiting for registry...");
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 2000));
   }
-  
+
   if (!registryReady) {
     console.log("[AutoTrading] Registry not available, disabling auto-trading");
     autoTradingActive = false;
     return;
   }
-  
+
   console.log("[AutoTrading] Registry connected!");
-  
+
   // Initialize agents once
   console.log("[AutoTrading] Initializing agents with $10,000 each...");
   const agents = await coordinator.initializeAgents(10000);
   console.log(`[AutoTrading] Initialized ${agents.length} agents`);
-  
+
   // Main trading loop
   const POLL_INTERVAL = 60000; // 60 seconds
-  
+
   while (autoTradingActive) {
     try {
       // Fetch open markets
       const markets = await getOpenMarkets(10);
-      
+
       // Find new markets
-      const newMarkets = markets.filter(m => !processedMarkets.has(m.id));
-      
+      const newMarkets = markets.filter((m) => !processedMarkets.has(m.id));
+
       if (newMarkets.length > 0) {
         console.log(`[AutoTrading] Found ${newMarkets.length} new market(s)`);
-        
+
         // Run sessions SEQUENTIALLY (shared coordinator state doesn't support parallel)
         for (const market of newMarkets) {
           processedMarkets.add(market.id);
-          
+
           // Start trading session for this market
-          console.log(`[AutoTrading] Starting session for: ${market.question.slice(0, 50)}...`);
-          
+          console.log(
+            `[AutoTrading] Starting session for: ${market.question.slice(0, 50)}...`,
+          );
+
           const marketInfo: MarketInfo = {
             id: market.id,
             question: market.question,
@@ -681,28 +717,30 @@ export async function startAutoTrading() {
             resolutionDate: market.resolutionDate,
             status: market.status,
           };
-          
+
           // Create session
           const sessionId = `session_${market.id}_${Date.now()}`;
           const session: Session = {
             id: sessionId,
             marketId: market.id,
             marketQuestion: market.question,
-            status: 'INITIALIZING',
+            status: "INITIALIZING",
             interests: [],
             floorMessages: [],
             sideChats: new Map<string, SideChat>(),
             trades: [],
             startedAt: new Date().toISOString(),
           };
-          
+
           sessions.set(sessionId, session);
           subscribers.set(market.id, new Set());
-          
+
           // Run trading session SEQUENTIALLY - await completion before next market
           try {
             await runTradingSession(session, marketInfo);
-            console.log(`[AutoTrading] Session complete for: ${market.question.slice(0, 30)}...`);
+            console.log(
+              `[AutoTrading] Session complete for: ${market.question.slice(0, 30)}...`,
+            );
           } catch (err) {
             console.error(`[AutoTrading] Session error for ${market.id}:`, err);
           }
@@ -711,8 +749,8 @@ export async function startAutoTrading() {
     } catch (err) {
       console.error("[AutoTrading] Poll error:", err);
     }
-    
-    await new Promise(r => setTimeout(r, POLL_INTERVAL));
+
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL));
   }
 }
 
@@ -723,66 +761,69 @@ async function runTradingSession(session: Session, market: MarketInfo) {
   try {
     // Reset agents for new market
     coordinator.resetAgentsForNewMarket();
-    
+
     // Interest phase
-    session.status = 'INTEREST';
+    session.status = "INTEREST";
     console.log(`[Session ${session.id}] Running interest phase...`);
     const interests = await coordinator.runInterestPhase(market);
     session.interests = interests;
-    
-    const interested = interests.filter(i => i.type === 'INTERESTED');
-    console.log(`[Session ${session.id}] ${interested.length}/${interests.length} agents interested`);
-    
+
+    const interested = interests.filter((i) => i.type === "INTERESTED");
+    console.log(
+      `[Session ${session.id}] ${interested.length}/${interests.length} agents interested`,
+    );
+
     if (interested.length < 2) {
       console.log(`[Session ${session.id}] Not enough interest, closing`);
-      session.status = 'CLOSED';
+      session.status = "CLOSED";
       return;
     }
-    
+
     // Trading phase
-    session.status = 'TRADING';
+    session.status = "TRADING";
     console.log(`[Session ${session.id}] Starting trading floor...`);
-    
+
     const MAX_ROUNDS = 10;
     for (let round = 1; round <= MAX_ROUNDS; round++) {
-      if (session.status !== 'TRADING') break;
-      
+      if (session.status !== "TRADING") break;
+
       // Track current round
       (session as any).currentRound = round;
-      
+
       console.log(`[Session ${session.id}] Round ${round}/${MAX_ROUNDS}`);
-      
+
       coordinator.expireAgreements();
-      
+
       const newMessages = await coordinator.runFloorRound(
         market,
         session.interests,
         session.floorMessages,
         session.sideChats,
         round,
-        MAX_ROUNDS
+        MAX_ROUNDS,
       );
       session.floorMessages.push(...newMessages);
-      
+
       // Run side chats
       await coordinator.runAllSideChatsParallel(market, session.sideChats);
-      
+
       // Check if all agents left
-      const agentsLeft = session.floorMessages.filter(m => m.type === 'AGENT_LEFT').length;
+      const agentsLeft = session.floorMessages.filter(
+        (m) => m.type === "AGENT_LEFT",
+      ).length;
       const totalAgents = coordinator.getAgentCount();
       if (agentsLeft >= totalAgents) {
         console.log(`[Session ${session.id}] All agents left`);
         break;
       }
-      
-      await new Promise(r => setTimeout(r, 500));
+
+      await new Promise((r) => setTimeout(r, 500));
     }
-    
-    session.status = 'CLOSED';
+
+    session.status = "CLOSED";
     console.log(`[Session ${session.id}] Session complete`);
-    
   } catch (err) {
     console.error(`[Session ${session.id}] Error:`, err);
-    session.status = 'CLOSED';
+    session.status = "CLOSED";
   }
 }

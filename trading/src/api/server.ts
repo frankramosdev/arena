@@ -1,6 +1,6 @@
 /**
  * Trading Floor API Server
- * 
+ *
  * Starts the API and optionally runs auto-trading in the background.
  */
 
@@ -12,7 +12,7 @@ const AUTO_TRADE = process.env.AUTO_TRADE !== "false"; // Enable by default
 
 console.log(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                        SIG ARENA - TRADING FLOOR API                          ║
+║                        Basemarket - TRADING FLOOR API                          ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
 ║  Starting server on port ${PORT}...                                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -36,9 +36,11 @@ console.log(`  GET  /sessions/:id/chats  - Get side chats`);
 // Start auto-trading in background
 if (AUTO_TRADE) {
   console.log(`\n[Trading API] Auto-trading ENABLED - will poll for markets`);
-  startAutoTrading().catch(err => {
+  startAutoTrading().catch((err) => {
     console.error("[Trading API] Auto-trading error:", err);
   });
 } else {
-  console.log(`\n[Trading API] Auto-trading DISABLED - set AUTO_TRADE=true to enable`);
+  console.log(
+    `\n[Trading API] Auto-trading DISABLED - set AUTO_TRADE=true to enable`,
+  );
 }

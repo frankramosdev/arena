@@ -58,7 +58,7 @@ export const DEFAULT_GENERATION_CONFIG: GenerationConfig = {
     "ylecun",
     "karpathy",
     "naval",
-    "gajesh",
+    "frankramosdev",
     "tbpn",
   ],
 

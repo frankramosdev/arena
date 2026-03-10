@@ -2,18 +2,46 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Header, Footer, MarketCard } from "./components";
-import { fetchMarkets, fetchStats, toFrontendMarket, type RegistryStats } from "./lib/api";
+import {
+  fetchMarkets,
+  fetchStats,
+  toFrontendMarket,
+  type RegistryStats,
+} from "./lib/api";
 
-const categories = ["All", "AI", "Tech", "Crypto", "Space", "Memes", "Finance", "Politics"];
+const categories = [
+  "All",
+  "AI",
+  "Tech",
+  "Crypto",
+  "Space",
+  "Memes",
+  "Finance",
+  "Politics",
+];
 const INITIAL_LOAD = 6;
 const LOAD_MORE_COUNT = 6;
 
 type FrontendMarket = ReturnType<typeof toFrontendMarket>;
 
+const CYCLING_WORDS = [
+  "Anything",
+  "AI",
+  "Tech",
+  "Crypto",
+  "Space",
+  "Memes",
+  "Finance",
+  "Politics",
+];
+const CYCLE_INTERVAL = 1800;
+
 export default function MarketsPage() {
   const [allMarkets, setAllMarkets] = useState<FrontendMarket[]>([]);
   const [displayedCount, setDisplayedCount] = useState(INITIAL_LOAD);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [wordIndex, setWordIndex] = useState(0);
+  const [wordVisible, setWordVisible] = useState(true);
   const [stats, setStats] = useState<RegistryStats>({
     totalMarkets: 0,
     openMarkets: 0,
@@ -24,6 +52,17 @@ export default function MarketsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordVisible(false);
+      setTimeout(() => {
+        setWordIndex((i) => (i + 1) % CYCLING_WORDS.length);
+        setWordVisible(true);
+      }, 300);
+    }, CYCLE_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch data
   const fetchData = useCallback(async () => {
@@ -65,7 +104,10 @@ export default function MarketsPage() {
           const cat = m.category?.toLowerCase() || "";
           const tags = m.tags?.map((t: string) => t.toLowerCase()) || [];
           const searchTerm = selectedCategory.toLowerCase();
-          return cat.includes(searchTerm) || tags.some((t: string) => t.includes(searchTerm));
+          return (
+            cat.includes(searchTerm) ||
+            tags.some((t: string) => t.includes(searchTerm))
+          );
         });
 
   // Markets to display (paginated)
@@ -99,7 +141,19 @@ export default function MarketsPage() {
                 className="font-serif text-4xl md:text-5xl tracking-tight mb-4"
                 style={{ color: "var(--text-primary)" }}
               >
-                Trade the future of X
+                Trade the future of{" "}
+                <span
+                  className="text-accent-primary inline-block"
+                  style={{
+                    opacity: wordVisible ? 1 : 0,
+                    transform: wordVisible
+                      ? "translateY(0)"
+                      : "translateY(-8px)",
+                    transition: "opacity 0.3s ease, transform 0.3s ease",
+                  }}
+                >
+                  {CYCLING_WORDS[wordIndex]}
+                </span>{" "}
               </h1>
               <p
                 className="text-lg md:text-xl leading-relaxed mb-8"
@@ -120,8 +174,8 @@ export default function MarketsPage() {
                     {stats.totalVolume >= 1000000
                       ? `${(stats.totalVolume / 1000000).toFixed(1)}M`
                       : stats.totalVolume >= 1000
-                      ? `${(stats.totalVolume / 1000).toFixed(1)}K`
-                      : stats.totalVolume.toFixed(0)}
+                        ? `${(stats.totalVolume / 1000).toFixed(1)}K`
+                        : stats.totalVolume.toFixed(0)}
                   </p>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                     Total Volume
@@ -255,7 +309,10 @@ export default function MarketsPage() {
                   ? "No markets yet"
                   : `No ${selectedCategory} markets`}
               </p>
-              <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
+              <p
+                className="text-sm mb-4"
+                style={{ color: "var(--text-muted)" }}
+              >
                 {selectedCategory === "All"
                   ? "The creation agent will generate markets from trending X topics."
                   : "Try selecting a different category."}
@@ -330,7 +387,7 @@ export default function MarketsPage() {
               className="font-serif text-2xl md:text-3xl text-center mb-12"
               style={{ color: "var(--text-primary)" }}
             >
-              How SIG Arena Works
+              How Basemarket Works
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -363,14 +420,15 @@ export default function MarketsPage() {
                   className="font-serif text-lg mb-2"
                   style={{ color: "var(--text-primary)" }}
                 >
-                  Markets Born from X
+                  Markets Born from Social Media and World Events.
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
                   style={{ color: "var(--text-tertiary)" }}
                 >
-                  Creation Agent scans Twitter for trending topics, drama, and
-                  announcements — generating prediction markets automatically.
+                  Creation Agent scans X and Social Media for trending topics,
+                  drama, and announcements generating prediction markets
+                  automatically.
                 </p>
               </div>
 

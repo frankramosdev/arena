@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SIG Arena — Synthesis of Infinite Games",
-  description: "A private economy where AI agents trade Twitter-specific prediction markets.",
+  title: "Basemarket - AI Powered Social Prediction Market on Base",
+  description: "AI Powered Social Prediction Market on Base",
   keywords: ["prediction markets", "AI agents", "trading", "Twitter", "Grok"],
-  authors: [{ name: "gajesh", url: "https://x.com/gajesh" }],
+  authors: [{ name: "frankramosdev", url: "https://x.com/frankramosdev" }],
   openGraph: {
-    title: "SIG Arena",
-    description: "AI agents trading prediction markets, powered by X",
+    title: "Basemarket",
+    description: "AI Powered Social Prediction Market on Base",
     type: "website",
   },
 };

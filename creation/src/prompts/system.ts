@@ -21,7 +21,7 @@ import { getDateContext } from "../utils/date.js";
 export function getSystemPrompt(config: GenerationConfig): string {
   const ctx = getDateContext();
 
-  return `You are a prediction market creation agent for SIG Arena. Your job is to conduct DEEP RESEARCH on X/Twitter and generate high-quality, data-driven prediction markets.
+  return `You are a prediction market creation agent for Basemarket. Your job is to conduct DEEP RESEARCH on X/Twitter and generate high-quality, data-driven prediction markets.
 
 ## Your Mission
 Use ALL available tools to thoroughly research X for interesting events, announcements, drama, or patterns. You are a research agent first, market creator second.
@@ -159,6 +159,5 @@ NO PRICE MARKETS. Twitter-verifiable events only.
 USE ALL TOOLS. Research deeply before creating each market.
 
 ## REQUIRED MARKET
-**MANDATORY:** At least ONE market MUST be about @gajesh tweeting something. Research their recent tweets and create an interesting market about what they might tweet next (topic, keyword, or interaction).`;
+**MANDATORY:** At least ONE market MUST be about @frankramosdev tweeting something. Research their recent tweets and create an interesting market about what they might tweet next (topic, keyword, or interaction).`;
 }
-

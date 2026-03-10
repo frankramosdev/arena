@@ -1,6 +1,6 @@
 # Resolution Agent
 
-AI-driven market resolution for SIG Arena. Monitors markets approaching resolution time and uses X API to gather evidence and determine outcomes.
+AI-driven market resolution for Basemarket. Monitors markets approaching resolution time and uses X API to gather evidence and determine outcomes.
 
 ## Features
 
@@ -38,16 +38,19 @@ RESOLUTION_BATCH_SIZE=10             # Max markets per cycle
 ## API Endpoints
 
 ### Health Check
+
 ```bash
 GET /health
 ```
 
 ### Get Stats
+
 ```bash
 GET /stats
 ```
 
 ### Request Early Resolution
+
 ```bash
 POST /resolve
 {
@@ -61,6 +64,7 @@ POST /resolve
 ```
 
 ### Trigger Manual Cycle
+
 ```bash
 POST /cycle
 ```
@@ -79,10 +83,10 @@ POST /cycle
 
 ## Verification Types
 
-| Type | Description |
-|------|-------------|
-| `tweet_exists` | Check if account posted tweet with keywords |
-| `tweet_count` | Count tweets matching criteria |
-| `engagement_threshold` | Check likes/retweets/views |
-| `follower_milestone` | Check follower count |
-| `account_action` | Check for replies, follows, etc. |
+| Type                   | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `tweet_exists`         | Check if account posted tweet with keywords |
+| `tweet_count`          | Count tweets matching criteria              |
+| `engagement_threshold` | Check likes/retweets/views                  |
+| `follower_milestone`   | Check follower count                        |
+| `account_action`       | Check for replies, follows, etc.            |

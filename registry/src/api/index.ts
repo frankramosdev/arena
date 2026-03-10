@@ -1,6 +1,6 @@
 /**
- * SIG Arena Registry API
- * 
+ * Basemarket Registry API
+ *
  * Hono-based REST API for the market registry.
  */
 
@@ -20,8 +20,11 @@ import { authMiddleware } from "./middleware.js";
 // =============================================================================
 
 // Database path - use /app/data in production (Docker volume), local file otherwise
-const DB_PATH = process.env.DATABASE_PATH || 
-  (process.env.NODE_ENV === "production" ? "/app/data/markets.db" : "markets.db");
+const DB_PATH =
+  process.env.DATABASE_PATH ||
+  (process.env.NODE_ENV === "production"
+    ? "/app/data/markets.db"
+    : "markets.db");
 
 // Shared instances
 export const registry = new MarketRegistry(DB_PATH);
@@ -41,16 +44,20 @@ api.use("*", logger());
 // =============================================================================
 
 // Health & stats (no auth required)
-api.get("/", (c) => c.json({ 
-  name: "SIG Arena Registry", 
-  version: "1.0.0",
-  docs: "https://github.com/sigarena/registry",
-}));
+api.get("/", (c) =>
+  c.json({
+    name: "Basemarket Registry",
+    version: "1.0.0",
+    docs: "https://github.com/sigarena/registry",
+  }),
+);
 
-api.get("/health", (c) => c.json({ 
-  status: "ok", 
-  timestamp: new Date().toISOString() 
-}));
+api.get("/health", (c) =>
+  c.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  }),
+);
 
 api.get("/stats", (c) => {
   const stats = registry.getStats();

@@ -1,7 +1,7 @@
 /**
  * Registry API Client
  * 
- * HTTP client for interacting with the SIG Arena Registry API.
+ * HTTP client for interacting with the Basemarket Registry API.
  */
 
 // =============================================================================

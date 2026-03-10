@@ -1,7 +1,7 @@
 /**
  * Registry Tools
- * 
- * Tools for interacting with the SIG Arena Registry API.
+ *
+ * Tools for interacting with the Basemarket Registry API.
  */
 
 // Client functions (for direct use)
@@ -10,25 +10,25 @@ export {
   configureRegistry,
   getRegistryUrl,
   hasAgentToken,
-  
+
   // Market Queries
   marketExists,
   checkMarketsExist,
   getMarket,
   listMarkets,
   searchMarkets,
-  
+
   // Stats
   getRegistryStats,
   isRegistryHealthy,
-  
+
   // Resolution Operations
   getPendingResolutions,
   getOverdueMarkets,
   resolveMarket,
   batchResolveMarkets,
   getResolutionStats,
-  
+
   // Types
   type MarketSummary,
   type RegistryStats,

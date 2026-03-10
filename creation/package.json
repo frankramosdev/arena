@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "keywords": ["prediction-markets", "ai-agent", "xai", "grok"],
-  "author": "gajesh",
+  "author": "frankramosdev",
   "license": "ISC",
   "description": "Creation agent for generating X-specific prediction markets",
   "packageManager": "pnpm@9.15.0",
