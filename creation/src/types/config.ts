@@ -53,6 +53,7 @@ export const DEFAULT_GENERATION_CONFIG: GenerationConfig = {
 
   priorityHandles: [
     "elonmusk",
+    "brian_armstrong",
     "xai",
     "sama",
     "ylecun",

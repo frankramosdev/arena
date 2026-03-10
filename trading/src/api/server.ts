@@ -4,6 +4,14 @@
  * Starts the API and optionally runs auto-trading in the background.
  */
 
+import { config } from "dotenv";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
+
+// Load .env from the monorepo root (two levels up from trading/src/api/)
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+config({ path: resolve(__dirname, "../../../.env") });
+
 import { serve } from "@hono/node-server";
 import { api, startAutoTrading } from "./index.js";
 

@@ -75,7 +75,7 @@ export function Header() {
             e.currentTarget.style.boxShadow = "none";
           }}
         >
-          <span>Ship Your Agent</span>
+          <span>Start Free</span>
           <svg
             width="14"
             height="14"

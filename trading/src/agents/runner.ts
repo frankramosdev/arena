@@ -1,13 +1,14 @@
 /**
  * Agent Runner
- * 
- * Executes agent decisions by calling the LLM with X API tools.
+ *
+ * Executes agent decisions by calling the LLM.
+ * Interest phase uses the Responses API with native xSearch for real-time X research.
+ * Floor/side-chat phases use the Chat API for fast structured decisions.
  */
 
-import { generateText, stepCountIs } from "ai";
-import { xai } from "@ai-sdk/xai";
+import { generateText } from "ai";
+import { xai, xSearch } from "@ai-sdk/xai";
 import { z } from "zod";
-import { xTools } from "@sigarena/common/tools";
 
 import type {
   Agent,
@@ -64,17 +65,17 @@ const MainFloorActionSchema = z.discriminatedUnion("action", [
 
 const SideChatActionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("CHAT"), text: z.string() }),
-  z.object({ 
-    action: z.literal("PROPOSE"), 
-    text: z.string(), 
+  z.object({
+    action: z.literal("PROPOSE"),
+    text: z.string(),
     side: z.enum(["BUY", "SELL"]),
     token: z.enum(["YES", "NO"]),
     price: z.number().min(0.01).max(0.99),
     quantity: z.number().positive(),
   }),
-  z.object({ 
-    action: z.literal("COUNTER"), 
-    text: z.string(), 
+  z.object({
+    action: z.literal("COUNTER"),
+    text: z.string(),
     side: z.enum(["BUY", "SELL"]),
     token: z.enum(["YES", "NO"]),
     price: z.number().min(0.01).max(0.99),
@@ -86,13 +87,56 @@ const SideChatActionSchema = z.discriminatedUnion("action", [
 ]);
 
 // =============================================================================
+// HELPERS
+// =============================================================================
+
+/**
+ * Extract @handles from a market question/description (max 10 for xSearch)
+ */
+function extractHandles(text: string): string[] {
+  const matches = text.match(/@([A-Za-z0-9_]+)/g) || [];
+  return [...new Set(matches.map((h) => h.slice(1)))].slice(0, 10);
+}
+
+/**
+ * Wrap a promise with a timeout
+ */
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  operation: string
+): Promise<T> {
+  const timeout = new Promise<never>((_, reject) => {
+    setTimeout(
+      () => reject(new Error(`Timeout: ${operation} took longer than ${ms}ms`)),
+      ms
+    );
+  });
+  return Promise.race([promise, timeout]);
+}
+
+function parseJSON(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    throw new Error(`Failed to parse JSON from: ${text.slice(0, 200)}`);
+  }
+}
+
+// =============================================================================
 // AGENT RUNNER
 // =============================================================================
 
 export class AgentRunner {
   /**
-   * Get agent's interest in a market
-   * Agent can use X API tools to research before deciding
+   * Get agent's interest in a market.
+   * Uses Responses API + xSearch for native real-time X research.
+   * Passes allowedXHandles extracted from the market question so research
+   * is focused on the relevant accounts.
    */
   async getInterest(
     agent: Agent,
@@ -102,71 +146,40 @@ export class AgentRunner {
     const systemPrompt = buildSystemPrompt(agent);
     const prompt = buildInterestPrompt(agent, market, balance);
 
-    // X API tools for specific lookups
-    const researchTools = {
-      getUserByUsername: xTools.getUserByUsername,
-      getUserTweets: xTools.getUserTweets,
-      searchRecentTweets: xTools.searchRecentTweets,
-      getTrendsByWoeid: xTools.getTrendsByWoeid,
-    };
+    // Focus X search on handles mentioned in the market question
+    const handles = extractHandles(`${market.question} ${market.description}`);
 
     const result = await withTimeout(
       generateText({
-        model: xai(MODEL),
+        model: xai.responses(MODEL),
         system: systemPrompt,
         prompt,
-        tools: researchTools,
-        stopWhen: stepCountIs(MAX_RESEARCH_STEPS),
-        // Enable Live Search for X and web (native xAI feature)
-        providerOptions: {
-          xai: {
-            searchParameters: {
-              mode: "auto", // Model decides when to search
-              returnCitations: true,
-              maxSearchResults: 20,
-              sources: [
-                { type: "x", postFavoriteCount: 5, postViewCount: 500 },
-                { type: "news", safeSearch: true },
-              ],
-            },
-          },
+        tools: {
+          x_search: handles.length > 0
+            ? xSearch({ allowedXHandles: handles })
+            : xSearch(),
         },
+        maxSteps: MAX_RESEARCH_STEPS,
       }),
       LLM_TIMEOUT_MS,
       `Interest generation for ${agent.handle}`
     );
 
-    // Capture research context from tool calls
-    let researchContext = '';
-    if (result.steps && result.steps.length > 1) {
-      const toolCalls = result.steps.flatMap(s => s.toolCalls || []);
-      const toolResults = result.steps.flatMap(s => s.toolResults || []);
-      if (toolCalls.length > 0) {
-        console.log(`  [${agent.handle}] Used ${toolCalls.length} tool(s): ${toolCalls.map(t => t.toolName).join(', ')}`);
-        // Summarize key findings from tool results
-        const findings: string[] = [];
-        for (let i = 0; i < toolResults.length; i++) {
-          const tr = toolResults[i] as { result?: unknown };
-          const toolName = toolCalls[i]?.toolName || 'unknown';
-          if (tr?.result && typeof tr.result === 'object') {
-            const r = tr.result as Record<string, unknown>;
-            if (r.data && Array.isArray(r.data) && r.data.length > 0) {
-              findings.push(`${toolName}: ${r.data.length} results`);
-            }
-          }
-        }
-        if (findings.length > 0) {
-          researchContext = `Research: ${findings.join(', ')}`;
-        }
-      }
-    }
+    // Log research activity
     if (result.sources && result.sources.length > 0) {
-      console.log(`  [${agent.handle}] Live Search: ${result.sources.length} sources`);
-      researchContext += researchContext ? ` + ${result.sources.length} web sources` : `${result.sources.length} web sources`;
+      console.log(
+        `  [${agent.handle}] xSearch: ${result.sources.length} source(s)` +
+          (handles.length > 0 ? ` (focused on @${handles.join(", @")})` : "")
+      );
     }
 
     const parsed = parseJSON(result.text);
     const validated = InterestResponseSchema.parse(parsed);
+
+    const researchContext =
+      result.sources && result.sources.length > 0
+        ? `X research: ${result.sources.length} posts found`
+        : "";
 
     return {
       id: `interest_${agent.id}_${market.id}`,
@@ -179,12 +192,13 @@ export class AgentRunner {
       quantity: validated.type === "INTERESTED" ? validated.quantity : undefined,
       message: validated.message,
       createdAt: new Date().toISOString(),
-      researchContext, // Include research summary
+      researchContext,
     };
   }
 
   /**
-   * Get agent's action on the main floor
+   * Get agent's action on the main floor.
+   * Uses Chat API (fast, no research needed — agents already have context).
    */
   async getMainFloorAction(
     agent: Agent,
@@ -227,7 +241,8 @@ export class AgentRunner {
   }
 
   /**
-   * Get agent's action in a side chat
+   * Get agent's action in a side chat.
+   * Uses Chat API (fast structured negotiation).
    */
   async getSideChatAction(
     agent: Agent,
@@ -251,38 +266,6 @@ export class AgentRunner {
 
     const parsed = parseJSON(result.text);
     return SideChatActionSchema.parse(parsed);
-  }
-}
-
-// =============================================================================
-// HELPERS
-// =============================================================================
-
-/**
- * Wrap a promise with a timeout
- */
-async function withTimeout<T>(
-  promise: Promise<T>,
-  ms: number,
-  operation: string
-): Promise<T> {
-  const timeout = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error(`Timeout: ${operation} took longer than ${ms}ms`)), ms);
-  });
-  return Promise.race([promise, timeout]);
-}
-
-function parseJSON(text: string): unknown {
-  // Try direct parse first
-  try {
-    return JSON.parse(text);
-  } catch {
-    // Try to extract JSON from text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error(`Failed to parse JSON from: ${text.slice(0, 200)}`);
   }
 }
 

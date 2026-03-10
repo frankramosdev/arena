@@ -5,10 +5,9 @@
  */
 
 import { xai } from "@ai-sdk/xai";
-import { generateText, stepCountIs } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import {
-  xTools,
   getPendingResolutions,
   getOverdueMarkets,
   resolveMarket,
@@ -56,48 +55,18 @@ export class ResolutionAgent {
 
     let stepCount = 0;
 
-    // Build tools for resolution
+    // Build tools for resolution using xAI native x_search (replaces deprecated searchParameters)
     const tools = {
-      // Tweet search and retrieval
-      searchRecentTweets: xTools.searchRecentTweets,
-      getTweets: xTools.getTweets,
-      getTweetById: xTools.getTweetById,
-      getQuoteTweets: xTools.getQuoteTweets,
-      getRepostedBy: xTools.getRepostedBy,
-      
-      // User research
-      getUserByUsername: xTools.getUserByUsername,
-      getUsersByUsernames: xTools.getUsersByUsernames,
-      getUserById: xTools.getUserById,
-      getUsersByIds: xTools.getUsersByIds,
-      getUserTweets: xTools.getUserTweets,
-      getUserMentions: xTools.getUserMentions,
-      getUserFollowers: xTools.getUserFollowers,
-      getUserFollowing: xTools.getUserFollowing,
+      x_search: xai.tools.xSearch(),
     };
 
     try {
       const result = await generateText({
-        model: xai(CONFIG.xai.model),
+        model: xai.responses(CONFIG.xai.model),
         system: systemPrompt,
         prompt: resolutionPrompt,
         tools,
-        stopWhen: stepCountIs(50), // Max 50 steps for resolution
-        providerOptions: {
-          xai: {
-            searchParameters: {
-              mode: "auto",
-              returnCitations: true,
-              maxSearchResults: 20,
-              sources: [
-                {
-                  type: "x",
-                },
-              ],
-            },
-          },
-        },
-        onStepFinish: ({ toolCalls, toolResults }) => {
+        onStepFinish: ({ toolCalls }) => {
           stepCount++;
           if (toolCalls && toolCalls.length > 0) {
             for (const call of toolCalls) {
@@ -352,44 +321,17 @@ export class ResolutionAgent {
 
     let stepCount = 0;
 
-    // Build tools for resolution
+    // Build tools for resolution using xAI native x_search (replaces deprecated searchParameters)
     const tools = {
-      searchRecentTweets: xTools.searchRecentTweets,
-      getTweets: xTools.getTweets,
-      getTweetById: xTools.getTweetById,
-      getQuoteTweets: xTools.getQuoteTweets,
-      getRepostedBy: xTools.getRepostedBy,
-      getUserByUsername: xTools.getUserByUsername,
-      getUsersByUsernames: xTools.getUsersByUsernames,
-      getUserById: xTools.getUserById,
-      getUsersByIds: xTools.getUsersByIds,
-      getUserTweets: xTools.getUserTweets,
-      getUserMentions: xTools.getUserMentions,
-      getUserFollowers: xTools.getUserFollowers,
-      getUserFollowing: xTools.getUserFollowing,
+      x_search: xai.tools.xSearch(),
     };
 
     try {
       const result = await generateText({
-        model: xai(CONFIG.xai.model),
+        model: xai.responses(CONFIG.xai.model),
         system: systemPrompt,
         prompt: customPrompt,
         tools,
-        stopWhen: stepCountIs(50),
-        providerOptions: {
-          xai: {
-            searchParameters: {
-              mode: "auto",
-              returnCitations: true,
-              maxSearchResults: 20,
-              sources: [
-                {
-                  type: "x",
-                },
-              ],
-            },
-          },
-        },
         onStepFinish: ({ toolCalls }) => {
           stepCount++;
           if (toolCalls && toolCalls.length > 0) {

@@ -347,38 +347,43 @@ api.post("/sessions", async (c) => {
 
   // Start interest phase in background
   (async () => {
-    session.status = "INTEREST";
-    const interests = await coordinator.runInterestPhase(market);
-    session.interests = interests;
-    session.status = "TRADING";
+    try {
+      session.status = "INTEREST";
+      const interests = await coordinator.runInterestPhase(market);
+      session.interests = interests;
+      session.status = "TRADING";
 
-    // Start trading loop
-    const MAX_ROUNDS = 10;
-    for (let round = 1; round <= MAX_ROUNDS; round++) {
-      if (session.status !== "TRADING") break;
+      // Start trading loop
+      const MAX_ROUNDS = 10;
+      for (let round = 1; round <= MAX_ROUNDS; round++) {
+        if (session.status !== "TRADING") break;
 
-      // Track current round
-      (session as any).currentRound = round;
+        // Track current round
+        (session as any).currentRound = round;
 
-      // Expire old agreements
-      coordinator.expireAgreements();
+        // Expire old agreements
+        coordinator.expireAgreements();
 
-      // Run floor round (agents in parallel)
-      const newMessages = await coordinator.runFloorRound(
-        market,
-        session.interests,
-        session.floorMessages,
-        session.sideChats,
-        round,
-        MAX_ROUNDS,
-      );
-      session.floorMessages.push(...newMessages);
+        // Run floor round (agents in parallel)
+        const newMessages = await coordinator.runFloorRound(
+          market,
+          session.interests,
+          session.floorMessages,
+          session.sideChats,
+          round,
+          MAX_ROUNDS,
+        );
+        session.floorMessages.push(...newMessages);
 
-      // Run all side chats in parallel
-      await coordinator.runAllSideChatsParallel(market, session.sideChats);
+        // Run all side chats in parallel
+        await coordinator.runAllSideChatsParallel(market, session.sideChats);
+      }
+
+      session.status = "CLOSED";
+    } catch (err) {
+      console.error(`[Session ${session.id}] Fatal error:`, err);
+      session.status = "CLOSED";
     }
-
-    session.status = "CLOSED";
   })();
 
   return c.json({
