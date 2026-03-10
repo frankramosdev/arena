@@ -8,8 +8,8 @@
     "test": "pnpm -r test",
     "clean": "pnpm -r clean",
     
-    "registry": "pnpm --filter @sig-arena/registry start",
-    "registry:dev": "pnpm --filter @sig-arena/registry dev",
+    "registry": "dotenv -e .env -- pnpm --filter @sig-arena/registry start",
+    "registry:dev": "dotenv -e .env -- pnpm --filter @sig-arena/registry dev",
     "registry:test": "pnpm --filter @sig-arena/registry test",
     
     "frontend": "pnpm --filter frontend dev",
@@ -25,13 +25,13 @@
     "resolve:custom": "pnpm --filter @sigarena/resolution resolve:custom",
     "resolution:test": "pnpm --filter @sigarena/resolution test",
     
-    "trading": "pnpm --filter @sigarena/trading server",
-    "trading:dev": "pnpm --filter @sigarena/trading dev",
-    "trading:test": "pnpm --filter @sigarena/trading test",
-    "trade": "pnpm --filter @sigarena/trading trade",
-    "trade:once": "pnpm --filter @sigarena/trading trade:once",
-    "trade:demo": "pnpm --filter @sigarena/trading demo",
-    "trade:live": "pnpm --filter @sigarena/trading live",
+    "trading": "pnpm --filter @sigarena/trading run server",
+    "trading:dev": "pnpm --filter @sigarena/trading run dev",
+    "trading:test": "pnpm --filter @sigarena/trading run test",
+    "trade": "pnpm --filter @sigarena/trading run trade",
+    "trade:once": "pnpm --filter @sigarena/trading run trade:once",
+    "trade:demo": "pnpm --filter @sigarena/trading run demo",
+    "trade:live": "pnpm --filter @sigarena/trading run live",
     
     "ship": "pnpm --filter @sigarena/personality-creator ship",
     "ship:api": "pnpm --filter @sigarena/personality-creator api",

@@ -114,11 +114,10 @@ export function Footer() {
           style={{ borderColor: "var(--border-light)" }}
         >
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            xAI Hackathon Project — X API + Grok Track
+            Basemarket
           </p>
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            We have no association with SIG (the trading firm). Please
-            don&apos;t sue us.
+            Copyright 2026
           </p>
         </div>
       </div>

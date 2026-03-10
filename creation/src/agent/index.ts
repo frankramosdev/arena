@@ -40,9 +40,12 @@ export class CreationAgent {
     const tools = {
       // REGISTRY TOOL - Check for existing markets before generating
       searchExistingMarkets,
-      
+
+      // Built-in server-side tools (Agent Tools API)
+      web_search: xai.tools.webSearch(),
+      x_search: xai.tools.xSearch({ enableImageUnderstanding: true, enableVideoUnderstanding: true }),
+
       // X API tools for specific lookups
-      // NOTE: Searching is handled by Live Search (providerOptions.xai.searchParameters)
       getTweets: xTools.getTweets,
       getTweetById: xTools.getTweetById,
       getQuoteTweets: xTools.getQuoteTweets,
@@ -57,41 +60,19 @@ export class CreationAgent {
       getUserFollowing: xTools.getUserFollowing,
       getTrendsByWoeid: xTools.getTrendsByWoeid,
     };
-    log.info(`Registered ${Object.keys(tools).length} tools (1 registry + ${Object.keys(tools).length - 1} X API) + Live Search`);
+    const customToolCount = Object.keys(tools).length - 2; // subtract 2 built-in tools
+    log.info(`Registered ${Object.keys(tools).length} tools (1 registry + ${customToolCount - 1} X API + 2 built-in search)`);
 
     let text: string;
     try {
-      // Use xai() with custom tools + Live Search (not xai.responses())
-      // xai.responses() only supports server-side tools, can't mix with custom tools
+      // Use xai.responses() with Agent Tools API (replaces deprecated Live Search)
       const result = await generateText({
-        model: xai(CONFIG.xai.model),
+        model: xai.responses(CONFIG.xai.model),
       system: systemPrompt,
       prompt: marketPrompt,
         tools,
         // Enable multi-step tool calling - model can call tools multiple times
         stopWhen: stepCountIs(200), // Max 200 steps for deep research
-      providerOptions: {
-        xai: {
-            // Enable Live Search for X and web
-            searchParameters: {
-              mode: "auto", // Model decides when to search
-              returnCitations: true,
-              maxSearchResults: 25, // API max is 30
-              sources: [
-                {
-                  type: "x",
-                  // Search high-engagement posts
-                  postFavoriteCount: 10,
-                  postViewCount: 1000,
-                },
-                {
-                  type: "news",
-                  safeSearch: true,
-                },
-              ],
-            },
-        },
-      },
         onStepFinish: ({ toolCalls, toolResults, text: stepText }) => {
         stepCount++;
         if (toolCalls && toolCalls.length > 0) {
